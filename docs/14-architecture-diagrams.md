@@ -133,6 +133,7 @@ graph TB
     ROOT --> DOCS[docs/<br/>research + design]
     ROOT --> INFRA[docs/infra/<br/>self-hosting patterns]
     ROOT --> ADDONS[addons/<br/>Odoo modules]
+    ROOT --> COMP[components/<br/>agent · collector · sync]
     ROOT --> MIG[migration/<br/>OptimumPOS → Odoo ETL]
     ROOT --> PROG[program/<br/>fleet program docs]
     ROOT --> SCRIPTS[scripts/<br/>ops tooling]

@@ -1,0 +1,16 @@
+[Unit]
+Description=Atlas POS-Ops collector (Phase 0)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/atlas/posops
+ExecStart=/opt/atlas/posops/venv/bin/python /opt/atlas/posops/collector.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

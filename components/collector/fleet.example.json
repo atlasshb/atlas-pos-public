@@ -1,0 +1,10 @@
+{
+  "enrollment": {"token": "<ENROLLMENT_TOKEN>"},
+  "customers": [
+    {"id": "atlas-internal", "name": "Atlas (intern)", "tier": "internal", "color": "#5cc8ff",
+     "terminals": [{"node_id": "<NODE>", "label": "...", "tailnet_ip": "<IP>", "port": 8765, "token": "<BEARER_TOKEN>"}]},
+    {"id": "venue-a", "name": "Venue A", "tier": "external", "color": "#7CFFB2",
+     "terminals": [{"node_id": "venue-a-kassa1", "label": "Kassa",
+       "direct_mysql": {"host": "<TAILSCALE_IP>", "port": 3306, "user": "remote", "password": "<MYSQL_PASSWORD>", "database": "kassa"}}]}
+  ]
+}

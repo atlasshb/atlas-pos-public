@@ -59,9 +59,10 @@ graph LR
 | [`docs/14-architecture-diagrams.md`](docs/14-architecture-diagrams.md) | Mermaid architecture diagrams. |
 | [`docs/infra/`](docs/infra/00-overview.md) | De-identified self-hosting patterns: right-sizing, reversible migrations, backups that restore, SSO front door, hardening, silent-failure ops, LLM routing, incident lessons. |
 | [`addons/`](#modules) | Odoo 19 Community modules. |
+| [`components/`](components/README.md) | **Non-Odoo parts:** terminal agent, fleet collector, kassa→Odoo sync, Windows harness, onboarding, PCI-scan utils. |
 | [`migration/`](migration/MAPPING.md) | Idempotent OptimumPOS → Odoo 19 ETL and mapping. |
 | [`program/`](program/PROGRAM.md) | The discover → read-only mirror → replace program. |
-| [`scripts/`](scripts/pos-watch.sh) | Fleet watch, read-only mirror, restore verify, PAN scrubber, order journal. |
+| [`scripts/`](scripts/pos-watch.sh) | Fleet watch, read-only mirror, restore verify, provisioning, field playbooks. |
 | [`wiki/`](wiki/Home.md) | Condensed wiki pages (also mirrored to the repo wiki). |
 
 ## The short version

@@ -1,0 +1,11 @@
+{
+  "node_id": "<NODE_ID>",
+  "customer_id": "<CUSTOMER_ID>",
+  "collector_url": "http://192.0.2.10:8087",
+  "bind_host": "<TAILSCALE_IP>",
+  "bind_port": 8765,
+  "bearer_token": "<BEARER_TOKEN>",
+  "mysql": {"host": "192.0.2.10", "port": 3306, "user": "root", "password": "<MYSQL_PASSWORD>", "database": "kassa"},
+  "backup_dir": "C:\\atlas-pos\\posd\\backups",
+  "mysqldump": "C:\\xampp\\mysql\\bin\\mysqldump.exe"
+}
