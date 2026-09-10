@@ -53,5 +53,6 @@ and hardware partners we work with.
 | `11-oss-pos-projects.md` | Open-source POS projects worldwide + verdicts |
 | `12-payments-landscape.md` | Card terminals, PSPs, SoftPOS, open banking |
 | `13-world-pos-payments-trends.md` | Market-level trends (indicative) |
+| `14-architecture-diagrams.md` | Mermaid architecture diagrams |
 | `infra/` | Self-hosted infrastructure patterns & incident lessons (de-identified) |
 | `sources.md` | Source links |

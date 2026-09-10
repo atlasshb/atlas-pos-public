@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" role="img" aria-label="Atlas POS — open-source POS on Odoo 19">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0A1628"/>
+      <stop offset="1" stop-color="#0E1F38"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#12304F" stroke-width="1" opacity="0.5"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="320" fill="url(#bg)"/>
+  <rect width="1200" height="320" fill="url(#grid)"/>
+
+  <!-- Atlas POS mark -->
+  <g transform="translate(84 92) scale(2.1)">
+    <rect width="64" height="64" rx="12" fill="#081221" stroke="#12304F"/>
+    <path d="M 12 50 L 32 12 L 52 50 Z" stroke="#0EA5FF" stroke-width="2.5" stroke-linejoin="round" opacity="0.45" fill="none"/>
+    <path d="M 20 46 L 32 22 L 44 46 Z" fill="#0EA5FF"/>
+    <rect x="24" y="38" width="16" height="2.5" fill="#081221"/>
+    <circle cx="32" cy="18" r="2.5" fill="#F59E0B"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="240" y="158" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="76" font-weight="700" fill="#FFFFFF" letter-spacing="1">ATLAS <tspan fill="#0EA5FF">POS</tspan></text>
+  <text x="244" y="200" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="23" fill="#9FB3C8">Open-source Point-of-Sale on Odoo 19 Community</text>
+  <text x="244" y="234" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="20" fill="#6F8AA6">Worldline / CCV card terminals via the Pin Vandaag cloud API</text>
+
+  <!-- Accent + footer -->
+  <rect x="244" y="252" width="96" height="5" rx="2.5" fill="#F59E0B"/>
+  <text x="1120" y="292" text-anchor="end" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="17" fill="#5A7690">Atlas Corporation · Tilburg, NL</text>
+</svg>
