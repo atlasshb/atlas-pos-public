@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Venue B POS - ALTERATIONS & REPAIRS as SERVICE products
+    ============================================================
+    Odoo 19.0 Community. ADDITIVE only. Stable xmlids prefixed
+    "atlas_pos_seed.".
+
+    The core of a tailor's takings: vermaak/reparatie (tadilat/onarım).
+    These are LABOUR, not stock, so they are SERVICE products and the
+    price is agreed PER JOB at the counter.
+
+    === v19 SERVICE FIELD RULES ===
+      * type = 'service'   (one of the only three v19 values:
+               'consu' | 'service' | 'combo'; 'detailed_type' does not
+               exist in v19 and must never be referenced).
+      * is_storable is intentionally NOT set: a service can never be
+               storable (Odoo auto-forces it False), so there is nothing
+               to track in inventory - correct for labour.
+      * available_in_pos = True so the buttons show on the till.
+      * pos_categ_ids (Many2many, plural) -> the "Vermaak & Reparatie"
+               POS category.
+      * categ_id -> the internal "Diensten (Hizmetler)" category.
+
+    === PER-JOB / EDITABLE PRICE AT THE POS (how it works) ===
+      There is NO special product field for "variable price". The ability
+      to change a line's price at the till is a POS CONFIGURATION setting,
+      not product data:
+
+        Point of Sale > Configuration > Settings  (or the Venue B POS
+        config) > section "Pricing":
+          -> leave the price restriction / "Price Control" toggle DISABLED
+             (it is open/disabled by default).
+
+      With that left at its default, the cashier rings up an alteration,
+      taps the order line, presses the "Price" button (keyboard shortcut
+      'p'), and types the amount agreed for that specific garment.
+
+      Because of this manual workflow:
+        * serv_vermaak_alg and serv_reparatie start at list_price = 0.00 -
+          a deliberate placeholder; the cashier MUST enter the per-job
+          price. (If they forget, the line stays 0 - acceptable for the
+          manual-price flow, but worth covering in counter training.)
+        * serv_inkorten and serv_rits carry a sensible DEFAULT price the
+          cashier can keep for the common case or override per job.
+
+      NOTE: if the shop later enables cashier PINs / restricted POS rights,
+      whoever rings up alterations needs the price-edit right, or the
+      override is blocked.
+
+    === TAX ===
+      taxes_id is OMITTED -> inherits the company default Sales Tax. In NL,
+      tailoring/alteration LABOUR is the 21% standard BTW rate (same as
+      goods), so these services are 21% like everything else. Verify the
+      company default sale tax = 21% BTW once after install (see
+      product_template.xml header). No 9%/0% line is used anywhere.
+
+    noupdate="0": module-owned seed services, safe to re-assert on upgrade.
+-->
+<odoo>
+    <data noupdate="0">
+
+        <!-- Open-ended labour: price set per job at the counter (start 0.00) -->
+        <record id="serv_vermaak_alg" model="product.template">
+            <field name="name">Vermaak (Tadilat) - prijs per opdracht</field>
+            <field name="type">service</field>
+            <field name="list_price">0.00</field>
+            <field name="available_in_pos" eval="True"/>
+            <field name="categ_id" ref="prod_categ_diensten"/>
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_vermaak')])]"/>
+        </record>
+
+        <record id="serv_reparatie" model="product.template">
+            <field name="name">Reparatie (Onarım) - prijs per opdracht</field>
+            <field name="type">service</field>
+            <field name="list_price">0.00</field>
+            <field name="available_in_pos" eval="True"/>
+            <field name="categ_id" ref="prod_categ_diensten"/>
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_vermaak')])]"/>
+        </record>
+
+        <!-- Common jobs: default price the cashier may keep or override -->
+        <record id="serv_inkorten" model="product.template">
+            <field name="name">Inkorten broek/jurk (Boy kısaltma)</field>
+            <field name="type">service</field>
+            <field name="list_price">15.00</field>
+            <field name="available_in_pos" eval="True"/>
+            <field name="categ_id" ref="prod_categ_diensten"/>
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_vermaak')])]"/>
+        </record>
+
+        <record id="serv_rits" model="product.template">
+            <field name="name">Rits vervangen (Fermuar değiştirme)</field>
+            <field name="type">service</field>
+            <field name="list_price">20.00</field>
+            <field name="available_in_pos" eval="True"/>
+            <field name="categ_id" ref="prod_categ_diensten"/>
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_vermaak')])]"/>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Venue B POS - internal product categories (product.category)
+    ============================================================
+    Odoo 19.0 Community. ADDITIVE only. Stable xmlids prefixed
+    "atlas_pos_seed.".
+
+    IMPORTANT: product.category is the INTERNAL/accounting category
+    (product.template.categ_id), and is a DIFFERENT model from
+    pos.category (the till-screen grouping in pos_category.xml).
+    Do not confuse the two:
+       - categ_id        -> product.category   (this file)
+       - pos_categ_ids   -> pos.category       (pos_category.xml)
+
+    These two custom categories let us keep physical goods and
+    labour/services cleanly separated in the product master without
+    touching the company's existing product category tree. Any product
+    in this pack that does not reference one of these simply inherits
+    Odoo's default "All" category (product.product_category_all) - which
+    is also fine - so these are provided for tidy reporting, not required.
+
+    noupdate="0": module-owned reference data, safe to re-assert on upgrade.
+-->
+<odoo>
+    <data noupdate="0">
+
+        <record id="prod_categ_kleding" model="product.category">
+            <field name="name">Kleding (Giyim)</field>
+            <field name="parent_id" ref="product.product_category_goods"/>
+        </record>
+
+        <record id="prod_categ_diensten" model="product.category">
+            <field name="name">Diensten (Hizmetler)</field>
+            <field name="parent_id" ref="product.product_category_services"/>
+        </record>
+
+    </data>
+</odoo>

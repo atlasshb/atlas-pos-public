@@ -1,0 +1,47 @@
+# pos-watch@.timer — Atlas POS program, reachability WATCHER (read-only)
+# =============================================================================
+# Drives pos-watch@%i.service on a frequent polling cadence. %i is the client
+# slug (venue_a, venue_b, venue_c, ...).
+#
+# Install / enable (on pos-hub, as the hub user = root):
+#     systemctl enable --now pos-watch@venue_b.timer
+#     systemctl list-timers 'pos-watch@*'
+#
+# WHY THIS SCHEDULE:
+#   * This is frequent, read-only, low-cost polling (tailscale ping + two TCP
+#     connect() probes) — NOT a catch-up/backup job like pos-mirror. There is
+#     nothing to "catch up" on: a missed tick just means the next tick (a few
+#     minutes later) observes current reachability. Hence:
+#       OnUnitActiveSec=3min   (run again 3 min after the LAST run finished)
+#       Persistent=false       (do NOT fire a backlog run if pos-hub was down;
+#                               we only care about the CURRENT reachability
+#                               state, not historical ticks we missed)
+#   * OnBootSec gives a first check shortly after boot instead of waiting a
+#     full 3 minutes for the initial OnUnitActiveSec to elapse.
+#   * No RandomizedDelaySec smear: unlike pos-mirror's heavy dump+twin+B2 job,
+#     a tailscale ping + two port probes is negligible load, so several
+#     clients' watch timers firing close together is not a concern.
+# =============================================================================
+
+[Unit]
+Description=Atlas POS reachability watch schedule (read-only, frequent) for client %i
+Documentation=file:/opt/atlas-pos/systemd/pos-watch@.service
+
+[Timer]
+Unit=pos-watch@%i.service
+
+# First check shortly after boot...
+OnBootSec=2min
+# ...then again every 3 minutes after each run completes. Frequent polling,
+# not a catch-up job — see rationale above.
+OnUnitActiveSec=3min
+
+# Do NOT run a backlog tick after downtime: we only care about reachability
+# AS OF NOW, not what we missed while pos-hub was off.
+Persistent=false
+
+# Coalesce wake-ups with other timers to be gentle on the always-on VPS.
+AccuracySec=30sec
+
+[Install]
+WantedBy=timers.target

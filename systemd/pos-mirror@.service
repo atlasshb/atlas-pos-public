@@ -1,0 +1,87 @@
+# pos-mirror@.service — Atlas POS program, capability B (TWIN / MIRROR / BACKUP)
+# =============================================================================
+# Templated, per-client oneshot that runs the SHIPPED combined pull+twin+restic
+# mirror:  scripts/pos-mirror.sh  (NOT the doc's old bin/pos_pull.sh name).
+#
+#   %i = client slug (must match [a-z0-9_]+, e.g. venue_a, venue_b, venue_c)
+#
+# Install (on pos-hub, as the hub user = root):
+#     cp systemd/pos-mirror@.service systemd/pos-mirror@.timer /etc/systemd/system/
+#     systemctl daemon-reload
+#     systemctl enable --now pos-mirror@venue_a.timer
+#
+# Manual one-off (still honours the in-script fail-closed gate):
+#     systemctl start pos-mirror@venue_a.service
+#     journalctl -u pos-mirror@venue_a.service -f
+#
+# WHY oneshot: this is a job, not a daemon. It pulls once, refreshes the twin,
+# ships to B2, then exits. The timer (pos-mirror@.timer) drives the schedule.
+#
+# SAFETY (these mirror the hardening already baked into scripts/pos-mirror.sh —
+# the script is the source of truth; the unit must never WEAKEN those gates):
+#   * MIRROR_ENABLED / DPA_SIGNED / QUIET_WINDOW are enforced IN THE SCRIPT from
+#     the per-client env file (clients/<client>/env, chmod 600). The unit does
+#     not, and must not, bypass them. An unreachable terminal or a disabled
+#     client is a clean exit 0, so a non-zero result here is a REAL failure.
+#   * Runs as the hub user (root) because it needs the local docker socket (the
+#     per-client twin container), the tailscale CLI, restic + B2 creds, and the
+#     chmod-600 per-client env/twin.pw under /opt/atlas-pos. This is a hub-only
+#     (L0) action: it reads the terminal read-only and writes only to pos-hub.
+#   * Hardening directives below are deliberately CONSERVATIVE: we tighten the
+#     ambient process but must NOT break docker.sock access, tailnet egress, or
+#     writes under the posops tree. ProtectSystem=full keeps /usr,/boot,/etc
+#     read-only while still allowing /opt/atlas-pos writes via ReadWritePaths.
+# =============================================================================
+
+[Unit]
+Description=Atlas POS read-only mirror (pull + twin + restic) for client %i
+Documentation=file:/opt/atlas-pos/scripts/pos-mirror.sh
+Documentation=file:/opt/atlas-pos/ARCHITECTURE.md
+# Don't fight the network coming up; the script's own reachability gate decides
+# whether the terminal is actually up (offline = clean skip, never an error).
+Wants=network-online.target docker.service
+After=network-online.target docker.service tailscaled.service
+# A failing run should not wedge the unit; the timer retries next window.
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+# Hub user. The script needs docker.sock + restic + the chmod-600 secrets.
+User=root
+Group=root
+
+# The ACTUAL shipped script (combined pull+twin+restic). %i is the client slug.
+# %i is validated again inside the script ([a-z0-9_]+) — defence in depth.
+WorkingDirectory=/opt/atlas-pos
+ExecStart=/opt/atlas-pos/scripts/pos-mirror.sh %i
+
+# A mirror run (full dump + gzip + twin load + restic to B2) can take a while on
+# a large catalog or a slow uplink; don't let systemd kill a healthy long pull.
+TimeoutStartSec=3600
+# Surface a real failure to the journal but never spin: the timer owns cadence.
+Restart=no
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=6
+
+# --- Hardening (conservative: must not break docker.sock / tailnet / posops) ---
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=read-only
+# The script writes dumps/logs/status/twin.pw/lock under the posops tree only.
+ReadWritePaths=/opt/atlas-pos
+# Lock file + the private mysql defaults-file the script mktemp's live in TMPDIR.
+PrivateTmp=true
+ProtectControlGroups=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+RemoveIPC=true
+# Note: we intentionally do NOT set PrivateNetwork (needs the tailnet) or
+# PrivateDevices/seccomp lockdowns that can interfere with the docker client.
+
+[Install]
+WantedBy=multi-user.target

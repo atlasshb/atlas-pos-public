@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_inherit_pos_pinvandaag" model="ir.ui.view">
+        <field name="name">res.config.settings.form.inherit.pos.pinvandaag</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <block id="pos_payment_terminals_section" position="inside">
+                <div class="col-12 col-lg-6 o_setting_box"
+                    title="The transactions are processed by Pin Vandaag. Set your terminal ID and terminal API key on the related payment method.">
+                    <div class="o_setting_left_pane">
+                        <field name="module_pos_pinvandaag"/>
+                    </div>
+                    <div class="o_setting_right_pane">
+                        <label for="module_pos_pinvandaag" string="Pin Vandaag"/>
+                        <div class="text-muted">
+                            Accept payments with a Pin Vandaag terminal (CCV / Worldline)
+                        </div>
+                    </div>
+                </div>
+            </block>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Venue B POS - POS Configuration "Venue B Kassa" (Odoo 19.0 Community)
+    ====================================================================
+    Creates a dedicated pos.config and wires in the two payment methods plus a
+    SAFE, hardware-agnostic receipt-printer baseline.
+
+    PRINTER STRATEGY (per PRINTER research):
+      * Default receipt printing in Community = the browser print dialog
+        (window.print). It works with ANY Windows-installed printer and needs
+        ZERO pos.config changes. This is the only safe default for a blind build.
+      * We DO ship a custom header/footer (is_header_or_footer=True so they
+        actually render).
+      * We DO NOT enable ePOS (other_devices) and DO NOT hard-code an Epson IP
+        (epson_printer_ip). The printer's static LAN IP is unknown at blind-build
+        time, and a wrong/empty IP makes receipts FAIL to print instead of
+        falling back to the browser. ePOS is left as a documented on-site step
+        (commented at the bottom of this file).
+      * is_posbox / proxy_ip / iface_print_via_proxy / iface_cashdrawer are
+        IoT-box-only and are intentionally left at their defaults (False/empty).
+
+    PAYMENT METHODS:
+      Both methods are attached additively via Command.link (eval (4, ref)).
+      They must share the POS config's company_id (base.main_company) - which
+      they do. Their journals are linked in the post_init_hook.
+
+    IDEMPOTENCY: noupdate="1" so re-upgrades never overwrite on-site edits
+    (e.g. once the owner fills in the real Epson IP or tweaks the header).
+-->
+<odoo>
+    <data noupdate="1">
+
+        <record id="pos_config_venue_b" model="pos.config">
+            <field name="name">Venue B Kassa</field>
+            <field name="company_id" ref="base.main_company"/>
+
+            <!-- Attach both payment methods additively (does not disturb any
+                 method Odoo may have auto-created). -->
+            <field name="payment_method_ids" eval="[
+                (4, ref('atlas_pos_seed.pos_payment_method_cash')),
+                (4, ref('atlas_pos_seed.pos_payment_method_card')),
+            ]"/>
+
+            <!-- == Receipt header / footer (browser/PDF baseline) == -->
+            <!-- is_header_or_footer must be True for the text to render. -->
+            <field name="is_header_or_footer" eval="True"/>
+            <field name="receipt_header">Venue B
+Kledingreparatie &amp; Maatwerk - Galajurken &amp; Kostuums
+Tilburg
+KvK: __________   BTW: NL__________B01</field>
+            <field name="receipt_footer">Bedankt voor uw bezoek! / Tesekkurler!
+Vermaak &amp; reparatie - prijs per opdracht</field>
+
+            <!-- Tailor needs PRICES on the ticket (not a gift receipt). -->
+            <field name="basic_receipt" eval="False"/>
+
+            <!-- Keep printing MANUAL until a printer is confirmed on-site.
+                 (Auto-print works with ePOS/IoT, neither of which is set yet.) -->
+            <field name="iface_print_auto" eval="False"/>
+            <field name="iface_print_skip_screen" eval="True"/><!-- default -->
+
+            <!-- ============================================================
+                 ePOS / IoT fields - INTENTIONALLY NOT SET in this data file.
+                 Leaving them at their defaults keeps the browser/PDF print path
+                 active and unbreakable on a blind build.
+
+                 ON-SITE one-time upgrade (ONLY if the shop has an Epson ePOS LAN
+                 printer such as a TM-m30) - do via the UI, do NOT script blind:
+                   POS > Configuration > Settings > "Connected Devices":
+                     1. Enable "ePos Printer"  => other_devices = True
+                     2. "Epson Receipt Printer IP Address"
+                          => epson_printer_ip = <printer STATIC LAN IP>
+                     3. Browse https://<printer-ip> on the POS PC once and trust
+                        the printer's self-signed certificate (import into Windows
+                        Trusted Root) or printing is silently blocked.
+                     4. Reserve the printer IP on the router (DHCP reservation).
+                     5. Optionally enable Auto-print (iface_print_auto = True).
+
+                 DO NOT uncomment/enable these blind:
+                   <field name="other_devices" eval="True"/>          ePOS master switch
+                   <field name="epson_printer_ip">192.168.x.x</field> unknown IP = broken receipts
+
+                 IoT-box-only (not used here): is_posbox, proxy_ip,
+                 iface_print_via_proxy, iface_cashdrawer.
+                 ============================================================ -->
+        </record>
+
+    </data>
+</odoo>

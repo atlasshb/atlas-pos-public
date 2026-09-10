@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Venue B POS - Turkish (tr_TR) UI activation (Odoo 19.0 Community)
+    ================================================================
+    The owner is a Turkish speaker, so the POS / back-office UI must be available
+    in Turkish. The BUSINESS stays Dutch for accounting/VAT (l10n_nl, BTW) -
+    Turkish is the UI LANGUAGE ONLY. Do NOT install l10n_tr.
+
+    HOW ACTIVATION IS DONE
+    ======================
+    Turkish is activated SAFELY and IDEMPOTENTLY in the module's post_init_hook
+    (Python), NOT via a data record, because:
+
+      * The correct, supported v19 path is:
+            lang = env['res.lang']._activate_lang('tr_TR')        # idempotent no-op if already active
+            env['base.language.install'].create({
+                'lang_ids': [(6, 0, lang.ids)],
+                'overwrite': False,                                # MERGE, never clobber
+            }).lang_install()
+        This only touches res.lang + translation data; it cannot harm the company
+        or chart of accounts, and it never deactivates an existing language.
+
+      * The OLD data-file pattern is BROKEN on Odoo 18/19 and MUST NOT be used:
+            <record id="..." model="base.language.install">
+                <field name="lang">tr_TR</field>          (field removed in v18/19)
+                <field name="state">done</field>          (field removed in v18/19)
+            </record>
+            <function model="base.language.install" name="lang_install"/>
+        The wizard now uses a `lang_ids` Many2many (no single `lang`/`state`
+        fields), so the legacy XML FAILS TO LOAD on 19.0. That is exactly why
+        activation lives in the hook and NOT in this file.
+
+    This file is therefore intentionally a DOCUMENTATION/marker stub: it contains
+    NO active records, so it can be listed in __manifest__ 'data' (or omitted)
+    without any risk of breaking existing languages or the install.
+
+    Reference (place in __init__.py at module root, and register
+    'post_init_hook': 'post_init_hook' in __manifest__.py):
+
+        def post_init_hook(env):
+            # 1) Activate Turkish UI (idempotent; no-op if already active)
+            lang = env['res.lang']._activate_lang('tr_TR')
+            # 2) Load/merge the tr_TR translation pack WITHOUT clobbering terms
+            env['base.language.install'].create({
+                'lang_ids': [(6, 0, lang.ids)],
+                'overwrite': False,
+            }).lang_install()
+            # 3) (optional, additive) default the admin user to Turkish UI
+            try:
+                env.ref('base.user_admin').sudo().lang = 'tr_TR'
+            except Exception:
+                pass  # guard: user_admin may differ; never abort install
+-->
+<odoo>
+    <!-- No active records on purpose. See header: tr_TR is activated in the
+         post_init_hook via res.lang._activate_lang('tr_TR'), which is the only
+         install-safe, non-destructive method on Odoo 19. -->
+    <data noupdate="1"/>
+</odoo>

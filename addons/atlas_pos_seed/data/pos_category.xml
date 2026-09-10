@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Venue B POS - Point of Sale categories (pos.category)
+    ============================================================
+    Odoo 19.0 Community. ADDITIVE only. Stable xmlids prefixed
+    "atlas_pos_seed." so the records are owned by this module.
+
+    NOTE on the v19 model:
+      * pos.category is a SEPARATE model from product.category.
+      * Products link to these via the Many2many field
+        product.template.pos_categ_ids  (PLURAL, not the old
+        singular pos_categ_id which does NOT exist in v19).
+      * pos.category supports parent_id for hierarchy (not used here;
+        a flat list is enough for a single tailor counter).
+
+    Names are bilingual: Dutch primary, Turkish in parentheses, so the
+    install needs no translation file (the owner is a Turkish speaker,
+    but Turkish is the UI language only - see localization research).
+
+    noupdate="0": these are pure module-owned reference records; we are
+    happy for an -u upgrade to re-assert their names. They contain no
+    user-editable runtime data, so re-asserting is non-destructive.
+-->
+<odoo>
+    <data noupdate="0">
+
+        <record id="pos_categ_galajurken" model="pos.category">
+            <field name="name">Galajurken (Abiye)</field>
+            <field name="sequence">10</field>
+        </record>
+
+        <record id="pos_categ_kostuums" model="pos.category">
+            <field name="name">Kostuums (Takım Elbise)</field>
+            <field name="sequence">20</field>
+        </record>
+
+        <record id="pos_categ_kleding" model="pos.category">
+            <field name="name">Kleding (Giyim)</field>
+            <field name="sequence">30</field>
+        </record>
+
+        <record id="pos_categ_accessoires" model="pos.category">
+            <field name="name">Accessoires (Aksesuar)</field>
+            <field name="sequence">40</field>
+        </record>
+
+        <record id="pos_categ_vermaak" model="pos.category">
+            <field name="name">Vermaak &amp; Reparatie (Tadilat &amp; Onarım)</field>
+            <field name="sequence">50</field>
+        </record>
+
+    </data>
+</odoo>

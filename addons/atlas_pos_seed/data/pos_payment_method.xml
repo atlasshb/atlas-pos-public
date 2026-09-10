@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Venue B POS - Payment Methods (Odoo 19.0 Community)
+    ===================================================
+    Two payment methods for a Dutch-registered Turkish tailor shop:
+
+      1. CASH  ("Contant")  -> linked to a CASH journal  (type=cash)
+      2. CARD  ("Pinnen / Worldline kaart") -> linked to a BANK journal (type=bank)
+
+    IMPORTANT (Community 19.0 constraints, per research):
+      * The Worldline YOMANI is a STANDALONE wired terminal. In Odoo 19
+        Community there is NO integrated-terminal option
+        (pos.payment.method._get_payment_terminal_selection() returns []).
+        The supported representation is a MANUAL, non-integrated card method:
+        the cashier runs the physical terminal by hand and Odoo only records
+        the tendered amount. => use_payment_terminal is left UNSET / False.
+      * Do NOT set `type` or `is_cash_count` here. Both are COMPUTED/read-only
+        and derive 100% from the linked journal's journal type. Writing them
+        either does nothing or raises on upgrade.
+      * Do NOT add pos_iot / pos_six / pos_worldline / pos_adyen / pos_stripe
+        anywhere - none exist in Community; the install would fail.
+
+    The journal_id linking is intentionally NOT done in this XML. Cash/bank
+    journal xmlids vary per DB and per localization version, and the DB may be
+    bare at install time. The post_init_hook in __init__.py resolves journals by
+    SEARCH (company_id + type) and links them defensively/idempotently. These
+    records are created with noupdate="1" so a later re-upgrade never clobbers
+    manual edits made on-site.
+-->
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================
+             PAYMENT METHOD 1 - CASH (Contant)
+             Becomes type='cash' / is_cash_count=True once the post_init_hook
+             links a CASH journal. name is translate=True (Turkish UI shows
+             its translation).
+             ============================================================ -->
+        <record id="pos_payment_method_cash" model="pos.payment.method">
+            <field name="name">Contant</field>
+            <field name="split_transactions" eval="False"/>
+            <field name="company_id" ref="base.main_company"/>
+            <!-- journal_id (CASH journal, type=cash) linked in post_init_hook -->
+            <!-- DO NOT set type / is_cash_count / use_payment_terminal here -->
+        </record>
+
+        <!-- ============================================================
+             PAYMENT METHOD 2 - MANUAL CARD (Pinnen / Worldline kaart)
+             Becomes type='bank' / is_cash_count=False once the post_init_hook
+             links a BANK journal. use_payment_terminal stays UNSET => this is
+             a MANUAL, non-integrated card method (standalone Worldline YOMANI).
+             ============================================================ -->
+        <record id="pos_payment_method_card" model="pos.payment.method">
+            <field name="name">Pinnen / Worldline kaart</field>
+            <field name="split_transactions" eval="False"/>
+            <field name="company_id" ref="base.main_company"/>
+            <!-- journal_id (BANK journal, type=bank) linked in post_init_hook -->
+            <!-- use_payment_terminal intentionally LEFT UNSET (manual card) -->
+            <!-- DO NOT set type / is_cash_count here (computed from journal) -->
+        </record>
+
+    </data>
+</odoo>

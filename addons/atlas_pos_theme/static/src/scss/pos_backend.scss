@@ -1,0 +1,63 @@
+// ============================================================
+// VENUE B — Odoo backend polish (web.assets_backend) — ZWART + GOUD
+// Leesbaar: zwart navbar, witte tekst, goud accenten, goede contrast.
+// ============================================================
+
+:root {
+  --venue_b-gold: #B9961F;
+  --venue_b-gold-bright: #D8B658;
+  --venue_b-gold-soft: #E8D68C;
+  --venue_b-ink: #111111;
+  --venue_b-paper: #FFFFFF;
+  --venue_b-muted: #6B6B6B;
+}
+
+body, .o_web_client {
+  font-family: "Inter", "Montserrat", "Helvetica Neue", sans-serif;
+}
+
+// Top navbar -> zwart met gouden hover
+.o_main_navbar {
+  background: #111111;
+  border-bottom: 2px solid #B9961F;
+  .o_menu_brand, .o_nav_entry, .dropdown-toggle, .o_mail_preview, .o_user_menu {
+    color: #FFFFFF !important;
+    &:hover { color: #D8B658 !important; }
+  }
+  .o_menu_sections .o_nav_entry.active {
+    color: #D8B658 !important;
+    box-shadow: inset 0 -2px 0 #B9961F;
+  }
+}
+
+// Primary buttons -> goud met zwarte tekst (hoog contrast)
+.btn-primary {
+  background: linear-gradient(180deg, #D8B658 0%, #B9961F 100%);
+  border-color: #8A6D00;
+  color: #111111;
+  font-weight: 600;
+  &:hover, &:focus {
+    background: linear-gradient(180deg, #E8D68C 0%, #C9A227 100%);
+    border-color: #8A6D00;
+    color: #111111;
+  }
+}
+
+// Links -> donker goud, leesbaar op wit
+a, .o_web_client .o_control_panel a, .text-primary {
+  color: #8A6D00;
+}
+
+// KPI / breadcrumbs / headings
+.o_control_panel .o_breadcrumb, h1, h2, h3 {
+  color: #111111;
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+}
+
+// Tabs actief -> goud
+.nav-tabs .nav-link.active {
+  border-top: 2px solid #B9961F;
+  color: #8A6D00;
+  font-weight: 600;
+}

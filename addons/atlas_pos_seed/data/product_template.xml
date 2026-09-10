@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Venue B POS - saleable GOODS (product.template)
+    ============================================================
+    Odoo 19.0 Community. ADDITIVE only. Stable xmlids prefixed
+    "atlas_pos_seed.".
+
+    These are the physical articles sold over the counter: gala/evening
+    dresses, suits/costumes, general clothing and accessories.
+
+    === CRITICAL v19 PRODUCT FIELD RULES (do not regress) ===
+      * type:  in Odoo 19 product.template.type has EXACTLY three valid
+               values -> 'consu' (Goods), 'service' (Service), 'combo'.
+               Physical goods = 'consu'.
+               There is NO 'product'/'storable' value and the old
+               'detailed_type' field DOES NOT EXIST in v19 - referencing
+               either would crash the install.
+      * is_storable: separate Boolean ("Track Inventory"). Omitted here -
+               these are one-off gala dresses/suits; the shop does not run
+               perpetual stock. (It is auto-forced False for non-'consu'
+               anyway.) Left unset = no inventory tracking, which is what
+               a made-to-measure tailor wants.
+      * available_in_pos: defaults to False, so it MUST be set True
+               explicitly on every product that should appear on the till.
+      * pos_categ_ids: Many2many to pos.category (PLURAL). Set with the
+               (6,0,[...]) command. The singular pos_categ_id does NOT
+               exist in v19.
+      * categ_id: the internal product.category (see product_category.xml).
+
+    === TAX (Dutch BTW 21%) ===
+      taxes_id is deliberately OMITTED on every product so each one
+      INHERITS the company's default Sales Tax. For this Dutch-registered
+      company that default must be "21% BTW (hoog)". In NL, both clothing
+      and tailoring labour are taxed at the 21% standard rate, so 21%
+      applies to the entire Venue B catalogue - no 9% or 0% line anywhere.
+
+      We do NOT hard-code a tax xmlid (e.g. l10n_nl.btw_21): in v19 the
+      Dutch taxes are per-company records addressed as
+      account.<company_id>_btw_21, NOT a static global xmlid, so a static
+      ref would not resolve on this blind DB and would crash the install.
+      Inheriting the company default is the safe, blind-build-correct choice.
+      => ONE-TIME ADMIN CHECK after install: confirm the company default
+         Sales Tax = 21% BTW (Accounting > Configuration > Settings >
+         Default Taxes). Every product below then gets 21% automatically.
+
+    Prices are EUR placeholders; the owner can adjust them in the UI.
+
+    noupdate="0": module-owned seed catalogue, safe to re-assert on upgrade.
+-->
+<odoo>
+    <data noupdate="0">
+
+        <!-- ============ Galajurken (Abiye) ============ -->
+        <record id="prod_galajurk_std" model="product.template">
+            <field name="name">Galajurk (Abiye) - Standaard</field>
+            <field name="type">consu</field>
+            <field name="list_price">199.00</field>
+            <field name="available_in_pos" eval="True"/>
+            <field name="categ_id" ref="prod_categ_kleding"/>
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_galajurken')])]"/>
+        </record>
+
+        <record id="prod_galajurk_lux" model="product.template">
+            <field name="name">Galajurk (Abiye) - Luxe</field>
+            <field name="type">consu</field>
+            <field name="list_price">349.00</field>
+            <field name="available_in_pos" eval="True"/>
+            <field name="categ_id" ref="prod_categ_kleding"/>
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_galajurken')])]"/>
+        </record>
+
+        <record id="prod_galajurk_kind" model="product.template">
+            <field name="name">Galajurk Kind (Çocuk Abiye)</field>
+            <field name="type">consu</field>
+            <field name="list_price">99.00</field>
+            <field name="available_in_pos" eval="True"/>
+            <field name="categ_id" ref="prod_categ_kleding"/>
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_galajurken')])]"/>
+        </record>
+
+        <!-- ============ Kostuums (Takım Elbise) ============ -->
+        <record id="prod_kostuum_2dlg" model="product.template">
+            <field name="name">Kostuum 2-delig (Takım Elbise 2 parça)</field>
+            <field name="type">consu</field>
+            <field name="list_price">249.00</field>
+            <field name="available_in_pos" eval="True"/>
+            <field name="categ_id" ref="prod_categ_kleding"/>
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_kostuums')])]"/>
+        </record>
+
+        <record id="prod_kostuum_3dlg" model="product.template">
+            <field name="name">Kostuum 3-delig (Takım Elbise 3 parça)</field>
+            <field name="type">consu</field>
+            <field name="list_price">299.00</field>
+            <field name="available_in_pos" eval="True"/>
+            <field name="categ_id" ref="prod_categ_kleding"/>
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_kostuums')])]"/>
+        </record>
+
+        <record id="prod_colbert" model="product.template">
+            <field name="name">Colbert (Ceket)</field>
+            <field name="type">consu</field>
+            <field name="list_price">129.00</field>
+            <field name="available_in_pos" eval="True"/>
+            <field name="categ_id" ref="prod_categ_kleding"/>
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_kostuums')])]"/>
+        </record>
+
+        <record id="prod_pantalon" model="product.template">
+            <field name="name">Pantalon (Pantolon)</field>
+            <field name="type">consu</field>
+            <field name="list_price">69.00</field>
+            <field name="available_in_pos" eval="True"/>
+            <field name="categ_id" ref="prod_categ_kleding"/>
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_kostuums')])]"/>
+        </record>
+
+        <!-- ============ Kleding (Giyim) ============ -->
+        <record id="prod_overhemd" model="product.template">
+            <field name="name">Overhemd (Gömlek)</field>
+            <field name="type">consu</field>
+            <field name="list_price">39.00</field>
+            <field name="available_in_pos" eval="True"/>
+            <field name="categ_id" ref="prod_categ_kleding"/>
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_kleding')])]"/>
+        </record>
+
+        <record id="prod_rok" model="product.template">
+            <field name="name">Rok (Etek)</field>
+            <field name="type">consu</field>
+            <field name="list_price">49.00</field>
+            <field name="available_in_pos" eval="True"/>
+            <field name="categ_id" ref="prod_categ_kleding"/>
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_kleding')])]"/>
+        </record>
+
+        <!-- ============ Accessoires (Aksesuar) ============ -->
+        <record id="prod_stropdas" model="product.template">
+            <field name="name">Stropdas (Kravat)</field>
+            <field name="type">consu</field>
+            <field name="list_price">19.00</field>
+            <field name="available_in_pos" eval="True"/>
+            <field name="categ_id" ref="prod_categ_kleding"/>
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_accessoires')])]"/>
+        </record>
+
+        <record id="prod_sjaal" model="product.template">
+            <field name="name">Sjaal (Şal)</field>
+            <field name="type">consu</field>
+            <field name="list_price">24.00</field>
+            <field name="available_in_pos" eval="True"/>
+            <field name="categ_id" ref="prod_categ_kleding"/>
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_accessoires')])]"/>
+        </record>
+
+        <record id="prod_riem" model="product.template">
+            <field name="name">Riem (Kemer)</field>
+            <field name="type">consu</field>
+            <field name="list_price">29.00</field>
+            <field name="available_in_pos" eval="True"/>
+            <field name="categ_id" ref="prod_categ_kleding"/>
+            <field name="pos_categ_ids" eval="[(6, 0, [ref('pos_categ_accessoires')])]"/>
+        </record>
+
+    </data>
+</odoo>

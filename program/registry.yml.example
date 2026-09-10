@@ -1,0 +1,84 @@
+# =============================================================================
+# Atlas POS program — registry.yml  (FLEET SOURCE OF TRUTH)  — TEMPLATE
+# -----------------------------------------------------------------------------
+# NON-SECRET client topology. This file IS committed to git (it is the declarative
+# inventory of who exists and where). Secrets live ONLY in clients/<client>/env
+# (0600, gitignored) — never here.
+#
+# Copy to the real file and edit:
+#     cp registry.yml.example registry.yml
+#     # on the hub this is /opt/atlas-pos/registry.yml
+#
+# CONSUMERS:
+#   * scripts/fleet-inventory.sh     reads each client's tailnet host + display
+#     name to join the live tailnet probe against declared clients. Its reader
+#     (yq if present, else a flat-YAML awk fallback) understands the keys:
+#       name / host / node / enabled    <-- keep these populated for discovery.
+#   * scripts/odoo-provision-client.sh and the ETL key off the client SLUG (the
+#     mapping key) and the per-client env at clients/<client>/env.
+#
+# SCHEMA (per client slug):
+#   <slug>:
+#     display_name:     human label shown in the inventory table        (-> name)
+#     tailnet_host:     tailnet IP or MagicDNS name of the terminal      (-> host)
+#     node:             tailscale node hostname (for IP<->client match)
+#     optimum_db:       the OptimumPOS MySQL database name on that box
+#     dpa_signed_date:  YYYY-MM-DD the GDPR/AVG DPA was signed, or null
+#     quiet_window:     local HH:MM-HH:MM the mirror may pull in
+#     mirror_enabled:   declared intent only — the ENFORCING flag is MIRROR_ENABLED
+#                       in clients/<slug>/env. This is documentation/intent; the
+#                       fail-closed gate lives in the env file, never here.
+#     stage:            lifecycle: discovered | enrolled | mirrored | migrated | live
+#     enabled:          include this client in fleet discovery (true/false)
+#
+# IMPORTANT: registry.mirror_enabled / dpa_signed_date here are DECLARATIVE.
+# They do NOT enable anything. The mechanical safety gate (MIRROR_ENABLED=1,
+# DPA_SIGNED=1, QUIET_WINDOW) is read by pos-mirror.sh from clients/<slug>/env and
+# defaults OFF. Keeping both in sync is an operator discipline; the env wins.
+# =============================================================================
+
+clients:
+
+  # NOTE on the duplicated keys below: fleet-inventory.sh's flat-YAML fallback
+  # reader keys off `name` / `host` / `node`, while this program's schema uses
+  # `display_name` / `tailnet_host`. We carry BOTH so discovery works with or
+  # without yq. Keep them identical per client. (Do not put trailing `#` comments
+  # on a value line — the awk fallback does not strip them.)
+  venue_a:
+    display_name:    "Venue A"
+    name:            "Venue A"
+    tailnet_host:    "192.0.2.10"
+    host:            "192.0.2.10"
+    node:            "venue-a-till"
+    optimum_db:      "optimumpos"        # CONFIRM the real db name on first inspection
+    dpa_signed_date: null                # not yet signed -> mirror stays OFF
+    quiet_window:    "01:00-06:00"       # restaurant; pull only when closed
+    mirror_enabled:  false               # declarative; enforcing flag is in clients/venue_a/env
+    stage:           "enrolled"          # on tailnet, not yet mirrored
+    enabled:         true
+
+  venue_b:
+    display_name:    "Venue B"
+    name:            "Venue B"
+    tailnet_host:    "192.0.2.10"
+    host:            "192.0.2.10"
+    node:            "venue-b-till"
+    optimum_db:      "optimumpos"        # CONFIRM the real db name on first inspection
+    dpa_signed_date: null                # fill in YYYY-MM-DD once signed
+    quiet_window:    "01:00-06:00"       # Turkish tailor; powered off often
+    mirror_enabled:  false               # declarative; enforcing flag is in clients/venue_b/env
+    stage:           "migrated"          # Odoo db `venue_b` already live on :8069 (mid-migration)
+    enabled:         true
+
+  # venue_c:                         # example of a known-but-inert client:
+  #   display_name:    "Venue C"     # declared so it shows in discovery, but
+  #   name:            "Venue C"     # not yet tailnet-enrolled / no DPA.
+  #   tailnet_host:    ""
+  #   host:            ""
+  #   node:            ""
+  #   optimum_db:      "optimumpos"
+  #   dpa_signed_date: null
+  #   quiet_window:    "01:00-06:00"
+  #   mirror_enabled:  false
+  #   stage:           "discovered"
+  #   enabled:         true

@@ -1,0 +1,25 @@
+// ============================================================
+// VENUE B — Odoo brand SCSS variable overrides — ZWART + GOUD
+// Echte identiteit uit venue_b.nl (fse-cloths-rental thema):
+//   Logo zwart tekst, accent #5A3E31 (warm koffiebruin), Inter-font.
+// Rebrand keuze (Atlas): black + gold.
+// ============================================================
+
+$o-brand-primary:        #B9961F;   // Venue B gold (buttons, highlights)
+$o-brand-secondary:      #111111;   // near-black
+$o-community-color:      #B9961F;   // navbar active, links
+$o-enterprise-color:     #B9961F;
+$o-enterprise-primary-color: #B9961F;
+
+// Action / links
+$o-action:               #8A6D00;   // darker gold for links on white (contrast >= 4.5:1)
+$o-main-color-muted:     #6B6B6B;
+
+// Navbar (the top backend bar) — zwart, goud hover
+$o-navbar-background:            #111111;
+$o-navbar-inverse-link-color:    #F5F5F5;
+$o-navbar-inverse-link-hover-color: #D8B658;
+
+// Text
+$o-main-text-color:      #1A1A1A;
+$o-gray-900:             #1A1A1A;

@@ -1,0 +1,80 @@
+// ============================================================
+// VENUE B — Odoo 19 login / public page — ZWART + GOUD
+// Echte Odoo 19 structuur: body.bg-100 + .card.o_database_list,
+// form.oe_login_form, inputs#login/#password.
+// ============================================================
+
+// Full-bleed backdrop: zwart met gouden gloed (Odoo 19: body.bg-100)
+body.bg-100,
+body.o_web_client,
+body:has(.oe_login_form) {
+  background:
+    radial-gradient(1000px 500px at 50% -10%, rgba(216,182,88,0.16) 0%, rgba(0,0,0,0) 60%),
+    radial-gradient(1200px 700px at 50% 110%, #161616 0%, #0A0A0A 60%) fixed !important;
+  background-color: #0A0A0A !important;
+  color: #F5F5F5;
+}
+
+// Login card -> zwart glas-paneel met goud rand (Odoo 19: .card.o_database_list)
+body:has(.oe_login_form) .card,
+body.o_web_client .card,
+.card.o_database_list {
+  background: rgba(17,17,17,0.94) !important;
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(216,182,88,0.45) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 0 60px rgba(185,150,31,0.22) !important;
+  color: #F5F5F5;
+}
+
+// Alles binnen de login card -> leesbaar licht-op-zwart
+.o_database_list,
+.oe_login_form,
+.o_login_layout,
+body:has(.oe_login_form) {
+  font-family: "Inter", "Montserrat", "Helvetica Neue", sans-serif;
+
+  label, .text-muted, small, p { color: #CFCFCF !important; }
+  a { color: #D8B658 !important; }
+  a:hover { color: #E8D68C !important; }
+
+  h1, h2, h3 {
+    font-family: "Inter", sans-serif;
+    color: #FFFFFF !important;
+    font-weight: 700;
+  }
+
+  // Inputs: donker met goud focus
+  input.form-control,
+  .form-control {
+    background: #1F1F1F !important;
+    border: 1px solid rgba(216,182,88,0.35) !important;
+    color: #FFFFFF !important;
+    border-radius: 8px !important;
+    &::placeholder { color: #9A9A9A !important; }
+    &:focus { border-color: #D8B658 !important; box-shadow: 0 0 0 3px rgba(216,182,88,0.25) !important; }
+  }
+
+  // Database selector lijst
+  .o_database_list .o_database_item,
+  .o_database_list .list-group-item {
+    background: #1F1F1F !important;
+    color: #F5F5F5 !important;
+    border-color: rgba(216,182,88,0.25) !important;
+    &:hover { background: #2A2A2A !important; }
+  }
+
+  // Buttons: goud met zwarte tekst
+  .btn-primary {
+    background: linear-gradient(180deg, #D8B658 0%, #B9961F 100%) !important;
+    border: 0 !important; border-radius: 10px !important;
+    color: #111111 !important; font-weight: 600 !important;
+    &:hover { box-shadow: 0 0 24px rgba(216,182,88,0.45) !important; }
+  }
+  .btn-light, .btn-secondary, .btn-outline-primary {
+    background: #1F1F1F !important;
+    color: #F5F5F5 !important;
+    border-color: rgba(216,182,88,0.35) !important;
+    &:hover { background: #2A2A2A !important; }
+  }
+}

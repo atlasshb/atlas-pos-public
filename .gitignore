@@ -1,0 +1,53 @@
+# POS-adjacent secrets and runtime state — never commit these.
+
+# Per-venue env files (read-only MySQL creds, restic/B2, Odoo admin)
+clients/*/env
+clients/**/env
+*.env
+
+# Generated twin passwords
+clients/*/twin.pw
+clients/**/twin.pw
+*.pw
+
+# restic / Backblaze B2 credentials
+.restic-pw
+restic.pw
+*.restic
+b2_credentials
+.b2_account_info
+
+# Mirror artifacts: dumps, twins, logs, state, manifests
+dumps/
+clients/*/dumps/
+clients/**/dumps/
+clients/*/twin/
+clients/**/twin/
+clients/*/logs/
+clients/**/logs/
+clients/*/status.json
+clients/**/status.json
+state/
+*.sql.gz
+*.sql.gz.partial
+SHA256SUMS
+
+# Odoo ETL pre-drop snapshots
+snapshots/
+*-predrop-*.sql.gz
+
+# Real (non-template) registry
+registry.yml
+
+# Editor / OS noise
+*.swp
+*~
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+
+# Keep the non-secret templates
+!*.example
+!clients/_TEMPLATE/env.example
+!registry.yml.example

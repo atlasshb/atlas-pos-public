@@ -1,0 +1,86 @@
+# pos-watch@.service — Atlas POS program, reachability WATCHER (read-only)
+# =============================================================================
+# Templated, per-client oneshot that runs the READ-ONLY reachability watcher:
+#   scripts/pos-watch.sh
+#
+#   %i = client slug (must match [a-z0-9_]+, e.g. venue_a, venue_b, venue_c)
+#
+# Install (on pos-hub, as the hub user = root):
+#     cp systemd/pos-watch@.service systemd/pos-watch@.timer /etc/systemd/system/
+#     systemctl daemon-reload
+#     systemctl enable --now pos-watch@venue_b.timer
+#
+# Manual one-off:
+#     systemctl start pos-watch@venue_b.service
+#     journalctl -u pos-watch@venue_b.service -f
+#
+# WHY oneshot: this is a quick probe, not a daemon. It pings, does two TCP
+# connect() checks, updates state, and exits. The timer (pos-watch@.timer)
+# drives the frequent cadence.
+#
+# SAFETY / SCOPE (mirrors what's already baked into scripts/pos-watch.sh — the
+# script is the source of truth; the unit must never WEAKEN or ADD capability):
+#   * READ-ONLY monitoring only: tailscale ping + bare TCP probes on the MySQL
+#     and Odoo ports. No mysql/xmlrpc session is ever opened, no credentials
+#     are used, nothing is written to the terminal. This is why, unlike
+#     pos-mirror@.service, there is no MIRROR_ENABLED/DPA_SIGNED gate to honor
+#     here — read-only reachability probing is not the class of action
+#     PROGRAM.md principle #1 gates (see scripts/pos-watch.sh header).
+#   * Runs as the hub user (root) purely for consistency with the rest of
+#     /opt/atlas-pos (state file ownership, tailscale CLI access); it needs no
+#     elevated capability beyond that.
+#   * Hardening directives below are the same conservative posture as
+#     pos-mirror@.service: tighten the ambient process, keep /usr,/boot,/etc
+#     read-only, allow writes only under the posops tree (state + lock).
+# =============================================================================
+
+[Unit]
+Description=Atlas POS reachability watcher (read-only, tailscale ping + port probe) for client %i
+Documentation=file:/opt/atlas-pos/scripts/pos-watch.sh
+Documentation=file:/opt/atlas-pos/ARCHITECTURE.md
+# Don't fight the network coming up; the script's own probes just report
+# whatever they observe (offline = normal, non-error outcome).
+Wants=network-online.target
+After=network-online.target tailscaled.service
+# A failed probe tick should never wedge the unit; the timer retries in a
+# few minutes regardless.
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+# Hub user, for consistency with the rest of /opt/atlas-pos (state/lock files).
+User=root
+Group=root
+
+# The shipped watcher script. %i is the client slug.
+# %i is validated again inside the script ([a-z0-9_]+) — defence in depth.
+WorkingDirectory=/opt/atlas-pos
+ExecStart=/opt/atlas-pos/scripts/pos-watch.sh %i
+
+# This is a handful of network probes; it should return in seconds, never
+# minutes. Keep a tight bound so a wedged probe can't pile up across ticks.
+TimeoutStartSec=120
+Restart=no
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=6
+
+# --- Hardening (conservative: must not break tailnet / posops state writes) ---
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=read-only
+# The script writes only watch-state.json + its own lock under the posops tree.
+ReadWritePaths=/opt/atlas-pos
+PrivateTmp=true
+ProtectControlGroups=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+RemoveIPC=true
+# Note: we intentionally do NOT set PrivateNetwork (needs the tailnet).
+
+[Install]
+WantedBy=multi-user.target

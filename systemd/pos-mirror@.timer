@@ -1,0 +1,72 @@
+# pos-mirror@.timer — Atlas POS program, capability B (TWIN / MIRROR / BACKUP)
+# =============================================================================
+# Drives pos-mirror@%i.service on a per-client QUIET-WINDOW schedule. %i is the
+# client slug (venue_a, venue_b, venue_c, ...).
+#
+# Install / enable (on pos-hub, as the hub user = root):
+#     systemctl enable --now pos-mirror@venue_a.timer
+#     systemctl list-timers 'pos-mirror@*'
+#
+# WHY THIS SCHEDULE:
+#   * The terminal is a LIVE card-payment box on intermittent home/shop internet.
+#     A full dump can briefly load it, so the FIRST pull (and ideally all pulls)
+#     happens inside that client's QUIET WINDOW (closed hours). The window is
+#     ALSO enforced in-script via QUIET_WINDOW in clients/<client>/env — this
+#     OnCalendar is the schedule; the env var is the fail-closed guard. Keep the
+#     two consistent per client (e.g. OnCalendar 03:30 inside QUIET_WINDOW
+#     01:00-06:00).
+#   * OnCalendar below is a SAFE DEFAULT (nightly, deep quiet hours). Override
+#     per client with a drop-in so each site pulls in ITS own closed hours:
+#         systemctl edit pos-mirror@venue_a.timer
+#       and set, e.g.:
+#         [Timer]
+#         OnCalendar=
+#         OnCalendar=*-*-* 03:30
+#     (the empty OnCalendar= first line clears this default before adding one.)
+#
+#   * Persistent=true: if pos-hub was down (or asleep) at the scheduled instant,
+#     run ONCE on next boot to catch up — paired with the script's own quiet-
+#     window guard so a delayed catch-up that lands in business hours SKIPS
+#     cleanly rather than loading a live terminal.
+#
+#   * OPPORTUNISTIC CATCH-UP (note, not a second timer here): terminals power off
+#     often, so a scheduled window is frequently MISSED (terminal offline = the
+#     script exits 0, no dump). To still capture data when a normally-off box is
+#     briefly online, run a SECOND, more frequent opportunistic timer that fires
+#     OUTSIDE the loading-sensitive first-pull concern (the live POS tolerates an
+#     incremental read-only --single-transaction dump). Ship it as a per-client
+#     drop-in, e.g. /etc/systemd/system/pos-mirror-catchup@.timer with
+#         OnCalendar=*-*-* *:00/30:00      # every 30 min
+#     pointing at the SAME pos-mirror@.service. Concurrency is SAFE: the script
+#     takes a non-blocking per-client flock and a second overlapping run exits 0.
+#     The reachability gate makes each attempt a no-op when the terminal is down.
+#     (Left as a documented opt-in so we don't hammer every client by default.)
+# =============================================================================
+
+[Unit]
+Description=Atlas POS mirror schedule (quiet-window) for client %i
+Documentation=file:/opt/atlas-pos/systemd/pos-mirror@.service
+
+[Timer]
+Unit=pos-mirror@%i.service
+
+# Safe default: nightly at 03:17, deep in typical closed hours. Override per
+# client (systemctl edit) to match each site's real quiet window.
+OnCalendar=*-*-* 03:17
+
+# Catch up exactly once if pos-hub missed the window while down/asleep. The
+# script's QUIET_WINDOW guard prevents a catch-up from loading a live terminal
+# during business hours.
+Persistent=true
+
+# Smear starts across clients so several timers don't dogpile the hub / B2 at
+# the same instant (NIC, docker, restic, the twin loads).
+RandomizedDelaySec=900
+# Stable per-(client,boot) offset within that window so it isn't re-randomised
+# on every reload.
+FixedRandomDelay=true
+# Coalesce wake-ups with other timers to be gentle on the always-on VPS.
+AccuracySec=5min
+
+[Install]
+WantedBy=timers.target
