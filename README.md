@@ -6,6 +6,7 @@
 
 **Open-source Point-of-Sale research & components — Odoo 19 Community + Worldline / CCV card terminals via the Pin Vandaag cloud API.**
 
+[![CI](https://github.com/atlasshb/atlas-pos-public/actions/workflows/ci.yml/badge.svg)](https://github.com/atlasshb/atlas-pos-public/actions/workflows/ci.yml)
 [![License: MIT + LGPL-3](https://img.shields.io/badge/license-MIT%20%2B%20LGPL--3-blue.svg)](#license)
 [![Odoo 19](https://img.shields.io/badge/Odoo-19.0-714B67.svg)](https://github.com/odoo/odoo)
 [![Domain](https://img.shields.io/badge/domain-Point%20of%20Sale-0EA5FF.svg)](#whats-inside)
@@ -44,7 +45,7 @@ graph LR
     R[atlas-pos-public] --> D[docs/<br/>research & design]
     R --> I[docs/infra/<br/>self-hosting patterns]
     R --> A[addons/<br/>Odoo 19 modules]
-    R --> M[migration/<br/>OptimumPOS → Odoo]
+    R --> M[migration/<br/>DoPos → Odoo]
     R --> P[program/<br/>fleet program]
     R --> S[scripts/ · systemd/ · runbooks/]
     R --> W[wiki/ · assets/]
@@ -60,7 +61,7 @@ graph LR
 | [`docs/infra/`](docs/infra/00-overview.md) | De-identified self-hosting patterns: right-sizing, reversible migrations, backups that restore, SSO front door, hardening, silent-failure ops, LLM routing, incident lessons. |
 | [`addons/`](#modules) | Odoo 19 Community modules. |
 | [`components/`](components/README.md) | **Non-Odoo parts:** terminal agent, fleet collector, kassa→Odoo sync, Windows harness, onboarding, PCI-scan utils. |
-| [`migration/`](migration/MAPPING.md) | Idempotent OptimumPOS → Odoo 19 ETL and mapping. |
+| [`migration/`](migration/MAPPING.md) | Idempotent DoPos → Odoo 19 ETL and mapping. |
 | [`program/`](program/PROGRAM.md) | The discover → read-only mirror → replace program. |
 | [`scripts/`](scripts/pos-watch.sh) | Fleet watch, read-only mirror, restore verify, provisioning, field playbooks. |
 | [`wiki/`](wiki/Home.md) | Condensed wiki pages (also mirrored to the repo wiki). |
@@ -104,13 +105,29 @@ Full diagrams (payment sequence, migration, backups, fleet tiers) are in
 
 ## Documentation index
 
-`00` [Overview](docs/00-overview.md) · `01` [OSS POS evaluation](docs/01-oss-pos-evaluation.md) · `02` [Odoo POS landscape](docs/02-odoo-pos-landscape.md) · `03` [OCA ecosystem](docs/03-oca-pos-ecosystem.md) · `04` [Pin Vandaag integration](docs/04-pinvandaag-integration.md) · `05` [Payments architecture](docs/05-payments-architecture.md) · `06` [Migration strategy](docs/06-migration-strategy.md) · `07` [OptimumPOS gap analysis](docs/07-optimumpos-gap-analysis.md) · `08` [System context](docs/08-system-context.md) · `09` [Security & compliance](docs/09-security-compliance.md) · `10` [Device & printing](docs/10-device-printing.md) · `11` [OSS POS projects](docs/11-oss-pos-projects.md) · `12` [Payments landscape](docs/12-payments-landscape.md) · `13` [World trends](docs/13-world-pos-payments-trends.md) · `14` [Diagrams](docs/14-architecture-diagrams.md)
+`00` [Overview](docs/00-overview.md) · `01` [OSS POS evaluation](docs/01-oss-pos-evaluation.md) · `02` [Odoo POS landscape](docs/02-odoo-pos-landscape.md) · `03` [OCA ecosystem](docs/03-oca-pos-ecosystem.md) · `04` [Pin Vandaag integration](docs/04-pinvandaag-integration.md) · `05` [Payments architecture](docs/05-payments-architecture.md) · `06` [Migration strategy](docs/06-migration-strategy.md) · `07` [DoPos gap analysis](docs/07-dopos-gap-analysis.md) · `08` [System context](docs/08-system-context.md) · `09` [Security & compliance](docs/09-security-compliance.md) · `10` [Device & printing](docs/10-device-printing.md) · `11` [OSS POS projects](docs/11-oss-pos-projects.md) · `12` [Payments landscape](docs/12-payments-landscape.md) · `13` [World trends](docs/13-world-pos-payments-trends.md) · `14` [Diagrams](docs/14-architecture-diagrams.md) · `15` [DoBizzz/DoPos research](docs/15-dobizzz-dopos-research.md) · `16` [DoPos vs Odoo](docs/16-dopos-vs-odoo.md) · `17` [DoPos → Odoo migration](docs/17-dopos-to-odoo-migration.md)
+
+## Development
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+
+CI (GitHub Actions + Forgejo) runs the tests on every push; a manual
+`Odoo module install` workflow spins up Odoo 19 + Postgres and installs the
+modules. See [`tests/`](tests/README.md).
 
 ## Contributing
 
 Issues and pull requests are welcome — especially corrections to the research,
 additional open-source POS projects, and Odoo 19 port fixes. Please keep
 contributions free of credentials, client data and personal information.
+
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — how to contribute
+- [`SECURITY.md`](SECURITY.md) — reporting a vulnerability
+- [`CHANGELOG.md`](CHANGELOG.md) — release history
+- [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md)
 
 ## Attribution
 

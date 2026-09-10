@@ -10,7 +10,7 @@ or the client.
 > ## ‼️ CURRENT PHASE = PREPARATION + TESTING ONLY
 > Every **cutover / go-live** step below is FROZEN until explicit per-client consent in a quiet window.
 > Run now only: inventory, read-only mirror/twin/backup, per-client Odoo build, ETL `--dry-run` into staging,
-> config validation. Do not stop/replace any live OptimumPOS or process real payments without consent.
+> config validation. Do not stop/replace any live DoPos or process real payments without consent.
 
 ---
 
@@ -22,7 +22,7 @@ read-only pull (which is itself treated as a terminal touch and quiet-windowed o
 ### Phase 0 — Program Foundation (hub-only, zero client risk)
 **Entry:** today's reality (Venue B mid-migration, Venue A live, others undiscovered).
 **Work (all on pos-hub):**
-- Reverse-engineer the OptimumPOS MySQL schema **once** into a documented canonical map in
+- Reverse-engineer the DoPos MySQL schema **once** into a documented canonical map in
   `/root/pos_kb` (products, categories, prices, taxes/BTW, payment methods, tickets, staff). Reusable
   across every same-build client.
 - Build the reusable idempotent ETL toolkit in `/root/odoo_migration` (external-ID-keyed upserts,
@@ -43,7 +43,7 @@ Odoo template boots with NL BTW + manual Worldline; rollback trivial (nothing to
 - Inventory every client + terminal; record tailnet-enrolled (Venue A, Venue B) vs not (Venue C
   + unknowns).
 - For unenrolled sites: a **consent + hardware** step (agree to install Tailscale on a visit/remote
-  session), never a sweep. Capture OptimumPOS version, MySQL `:3306` reachability over tailnet,
+  session), never a sweep. Capture DoPos version, MySQL `:3306` reachability over tailnet,
   SMB `:445`, receipt-printer model, Worldline model, business hours (→ quiet window), BTW reg,
   catalog size.
 - Output one git-versioned inventory record per client under `/opt/atlas-pos`.
@@ -58,7 +58,7 @@ captured; per-site consent obtained before any deeper access.
 - Land as (1) a queryable `atlas-mariadb-<client>` twin and (2) versioned restic snapshots to B2.
 - Tolerate intermittency: missed pull = retry next time up; never block, never false-alert on an
   expected power-off.
-- Runs continuously from here through parallel-run and as ongoing DR until OptimumPOS is
+- Runs continuously from here through parallel-run and as ongoing DR until DoPos is
   decommissioned.
 **Exit:** client's twin is current on pos-hub; restic snapshot verified-restorable (restore-drill);
 incremental pull stable across several on/off cycles.
@@ -80,7 +80,7 @@ sign-off recorded.
 ### Phase 4 — Parallel Run → Cutover → Decommission (capability C, go-live)
 **Entry:** Phase 3 exit + explicit client go + a chosen quiet window.
 (Detailed step-by-step in the per-client cutover playbook, §3.)
-**Exit (per client):** OptimumPOS retired on that site; client running Atlas-owned Odoo POS; new Odoo
+**Exit (per client):** DoPos retired on that site; client running Atlas-owned Odoo POS; new Odoo
 DB under restic/B2 backup.
 
 ---
@@ -112,7 +112,7 @@ window-gated, with the client present/consenting.
 3. **Mirror** — twin is live and fresh; restic snapshot verified-restorable (capability B).
 4. **Build Odoo** — per-client Odoo DB instantiated from template; module installed (capability C).
 5. **ETL** — run from the twin; reconciliation report green; operator sign-off in the Mind ledger.
-6. **Parallel run** — install Odoo POS alongside OptimumPOS (or on a second till). OptimumPOS stays
+6. **Parallel run** — install Odoo POS alongside DoPos (or on a second till). DoPos stays
    system of record. Staff shadow-ring on Odoo. Nightly: re-pull twin + delta-load Odoo; compare
    end-of-day Z-totals. Run a real business cycle (≥1–2 weeks incl. a weekend); the Mind gate will not
    surface the cutover approval until ≥14 days of reconciled parallel-run is recorded.
@@ -121,10 +121,10 @@ window-gated, with the client present/consenting.
 8. **Cutover** (quiet window, closed hours, client consenting, operator on the box): final delta ETL
    from a fresh quiet-window dump → set Odoo as system of record → switch the terminal's default till
    to Odoo. Worldline stays standalone (manual method) so card payments are unaffected. Keep
-   OptimumPOS installed but demoted as the rollback path. Then **watch** the first full trading day
+   DoPos installed but demoted as the rollback path. Then **watch** the first full trading day
    with the operator reachable; ntfy alerts on errors; compare that day's Z-total against expectation.
-9. **Decommission** (only after a clean trading week on Odoo): final OptimumPOS dump archived to B2,
-   OptimumPOS uninstalled / license released, terminal left running Atlas Odoo only. The client's
+9. **Decommission** (only after a clean trading week on Odoo): final DoPos dump archived to B2,
+   DoPos uninstalled / license released, terminal left running Atlas Odoo only. The client's
    mirror puller is repurposed to back up the new Odoo DB.
 
 ---
@@ -134,10 +134,10 @@ window-gated, with the client present/consenting.
 | Stage | If it goes wrong | Rollback |
 |---|---|---|
 | Phase 0–1 (discovery) | n/a | Read-only; don't enroll a reluctant client. No terminal state changed. |
-| Phase 2 (mirror) | Pull misbehaves | Stop the puller, delete the twin schema. Terminal untouched; OptimumPOS runs as before. |
+| Phase 2 (mirror) | Pull misbehaves | Stop the puller, delete the twin schema. Terminal untouched; DoPos runs as before. |
 | Phase 3 (build/ETL) | Odoo wrong | Drop/rebuild the client Odoo DB from template; re-run ETL from the immutable twin snapshot. Fully hub-local. |
-| Step 6 (parallel run) | Odoo inaccurate | Just stop using Odoo — OptimumPOS was always system of record → zero impact. |
-| Step 8 (cutover, day 1) | Day-1 failure | Flip default till back to the still-installed OptimumPOS (data current to the quiet-window dump); re-mirror; investigate on the hub. Card payments never depended on the switch. |
+| Step 6 (parallel run) | Odoo inaccurate | Just stop using Odoo — DoPos was always system of record → zero impact. |
+| Step 8 (cutover, day 1) | Day-1 failure | Flip default till back to the still-installed DoPos (data current to the quiet-window dump); re-mirror; investigate on the hub. Card payments never depended on the switch. |
 | Step 9 (decommission) | Point of no easy return | Gated on a clean trading week + final archive + client sign-off before this step is allowed. |
 
 A pre-ETL `pg_dump` of each client Odoo DB is taken before every ETL run, so even a bad migration is a
@@ -153,7 +153,7 @@ clean restore. Nothing on a live terminal is ever modified before step 8.
 | Phase 1 discovery | Ongoing / overlapping | Known clients ~days; unenrolled gated on visit/consent |
 | **Venue B** cutover | ~4–6 weeks from foundation done | Already mid-migration; low live-risk |
 | **Venue A** cutover | ~8–12 weeks | Longer parallel run for a live restaurant; needs a genuinely quiet window |
-| **Fleet "OptimumPOS retired"** | ~5–7 months | Dominated by client consent/scheduling and discovery of unenrolled sites, not by engineering |
+| **Fleet "DoPos retired"** | ~5–7 months | Dominated by client consent/scheduling and discovery of unenrolled sites, not by engineering |
 
 The schedule is driven by client consent windows and enrollment, not by code. Engineering is the
 fast part; access and quiet windows are the constraint.
@@ -186,11 +186,11 @@ These are the human-gated inputs the program cannot proceed without:
 
 These need answering per client as the program runs; they do not block starting Phase 0.
 
-- Is OptimumPOS the **same build/schema** on every site, or per-site variants (determines whether the
+- Is DoPos the **same build/schema** on every site, or per-site variants (determines whether the
   canonical schema map is reusable or needs deltas)?
 - What is Venue B's current db `venue_b` state — how much is already migrated, and is it clean enough
   to adopt as the template instance or should it be reset?
-- Does OptimumPOS store prices **tax-inclusive or tax-exclusive**? (Determines whether the ETL divides
+- Does DoPos store prices **tax-inclusive or tax-exclusive**? (Determines whether the ETL divides
   by `(1+BTW)` and how `taxes_id` is set.)
 - What MySQL **engine** per site (InnoDB vs MyISAM)? MyISAM breaks `--single-transaction` consistency
   → may need closed-window per-table locking.
@@ -200,7 +200,7 @@ These need answering per client as the program runs; they do not block starting 
   Venue B `pos.config` template generalize or need a hospitality variant?
 - Is **sales history required inside Odoo** for any client's reporting/legal retention, or is the
   twin-as-archive sufficient for their accountant?
-- Are OptimumPOS **licenses** cleanly releasable on decommission, or is there contractual lock-in /
+- Are DoPos **licenses** cleanly releasable on decommission, or is there contractual lock-in /
   exit cost per client?
 - **Target freshness** per client: is nightly twin refresh enough, or is intra-day (e.g. every 2h)
   catalog/sales freshness needed? Drives timer cadence.

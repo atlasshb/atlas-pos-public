@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # =============================================================================
-# optimumpos_to_odoo.py
+# dopos_to_odoo.py
 # Atlas POS Program — capability C (REPLACE), ETL side.
 #
-# Idempotent, re-runnable ETL: read a client's OptimumPOS data from the
+# Idempotent, re-runnable ETL: read a client's DoPos data from the
 # MIRRORED READ-TWIN on pos-hub (capability B), transform, and load into the
 # target per-client Odoo 19 Community DB via XML-RPC.
 #
@@ -43,9 +43,9 @@
 #   Or pass --client <slug> to load migration/clients/<slug>.env
 #
 # USAGE:
-#   python optimumpos_to_odoo.py --client venue_b --dry-run
-#   python optimumpos_to_odoo.py --client venue_b            # real load
-#   python optimumpos_to_odoo.py --client venuea --with-history --dry-run
+#   python dopos_to_odoo.py --client venue_b --dry-run
+#   python dopos_to_odoo.py --client venue_b            # real load
+#   python dopos_to_odoo.py --client venuea --with-history --dry-run
 #
 # DEPENDENCIES: PyMySQL (or mysql-connector-python). xmlrpc.client is stdlib.
 # =============================================================================
@@ -71,7 +71,7 @@ except ImportError:  # pragma: no cover
     _HAVE_MYSQL = False
 
 
-LOG = logging.getLogger("optimumpos_etl")
+LOG = logging.getLogger("dopos_etl")
 
 
 # =============================================================================
@@ -79,7 +79,7 @@ LOG = logging.getLogger("optimumpos_etl")
 # =============================================================================
 @dataclass
 class TwinConfig:
-    """Connection to the per-client OptimumPOS READ-TWIN on pos-hub."""
+    """Connection to the per-client DoPos READ-TWIN on pos-hub."""
     host: str
     port: int
     user: str
@@ -102,7 +102,7 @@ class RunConfig:
     dry_run: bool = True
     with_history: bool = False
     tolerance_pct: Decimal = Decimal("0.5")   # acceptable price-sum drift %
-    # Default OptimumPOS prices are assumed tax-INCLUSIVE until confirmed per
+    # Default DoPos prices are assumed tax-INCLUSIVE until confirmed per
     # site. If True, we convert gross -> net = gross / (1 + rate). MUST verify.
     prices_tax_inclusive: bool = True
     # The company's DEFAULT sale BTW rate (NL standard 21%). A product whose
@@ -130,7 +130,7 @@ _LOCAL_TWIN_HOSTNAMES = {"localhost", "127.0.0.1", "::1"}
 
 def assert_twin_is_hub(host: str) -> None:
     """HARD precondition (per MEMORY.md safety rules): the ETL source MUST be the
-    hub read-twin, never a live OptimumPOS terminal.
+    hub read-twin, never a live DoPos terminal.
 
     A live terminal is reachable over the tailnet at a 100.x address (e.g. Le
     Venue A 192.0.2.10, Venue B 192.0.2.10). The twin lives on the hub and is
@@ -171,7 +171,7 @@ def assert_twin_is_hub(host: str) -> None:
     if ip in ipaddress.ip_network("100.64.0.0/10"):
         raise SystemExit(
             f"TWIN_MYSQL_HOST={host!r} is a 100.x tailnet address — that is a LIVE "
-            "OptimumPOS terminal, not the hub read-twin. Refusing to run the ETL "
+            "DoPos terminal, not the hub read-twin. Refusing to run the ETL "
             "against a live terminal (see MEMORY.md safety rules)."
         )
 
@@ -186,9 +186,9 @@ def assert_twin_is_hub(host: str) -> None:
 
 
 # =============================================================================
-# OptimumPOS schema map  --  THE CRITICAL TODO SURFACE
+# DoPos schema map  --  THE CRITICAL TODO SURFACE
 # -----------------------------------------------------------------------------
-# These names are PLACEHOLDERS. The real OptimumPOS MySQL schema is vendor-
+# These names are PLACEHOLDERS. The real DoPos MySQL schema is vendor-
 # defined and was NOT captured in this session. Before trusting this ETL you
 # MUST inspect the actual twin schema per site (Venue A 192.0.2.10, Venue B
 # 192.0.2.10) and pin every table/column below.
@@ -208,7 +208,7 @@ def assert_twin_is_hub(host: str) -> None:
 #     this ETL, but note MyISAM history tables for the twin's consistency.
 # =============================================================================
 SCHEMA: Dict[str, Dict[str, str]] = {
-    # TODO(schema): confirm against real OptimumPOS dump.
+    # TODO(schema): confirm against real DoPos dump.
     "product": {
         "table":      "tblArticle",          # TODO confirm
         "pk":         "ArticleID",            # TODO confirm
@@ -444,7 +444,7 @@ class Odoo:
 
     def _has_field(self, model: str, field_name: str) -> bool:
         """Whether `model` exposes `field_name` (cached). Used to detect whether
-        x_optimum_id has been provisioned on pos.category in the target DB."""
+        x_dopos_id has been provisioned on pos.category in the target DB."""
         cache = getattr(self, "_field_cache", None)
         if cache is None:
             cache = {}
@@ -474,14 +474,14 @@ class Odoo:
         Resolution order:
           1. local id-map state file (state_map[source_key] -> odoo id), then
              confirm the row still exists;
-          2. the x_optimum_id field on the model, if provisioned;
+          2. the x_dopos_id field on the model, if provisioned;
           3. otherwise create.
 
-        On create/update, x_optimum_id is set when the field exists, and the
+        On create/update, x_dopos_id is set when the field exists, and the
         state_map is updated so the binding persists across runs even if the
         field is absent.
         """
-        has_xid = self._has_field(model, "x_optimum_id")
+        has_xid = self._has_field(model, "x_dopos_id")
 
         # 1. Try the durable local id-map first.
         existing_id = state_map.get(source_key)
@@ -493,18 +493,18 @@ class Odoo:
             # Stale binding (row deleted in Odoo) — fall through to rediscover.
             state_map.pop(source_key, None)
 
-        # 2. Try the x_optimum_id field if the DB has it.
+        # 2. Try the x_dopos_id field if the DB has it.
         if has_xid:
-            found = self.search(model, [("x_optimum_id", "=", source_key)], limit=1)
+            found = self.search(model, [("x_dopos_id", "=", source_key)], limit=1)
             if found:
                 self.write(model, found, update_vals)
                 state_map[source_key] = found[0]
                 return ("updated", found[0])
 
-        # 3. Create. Stamp x_optimum_id when available.
+        # 3. Create. Stamp x_dopos_id when available.
         cvals = dict(create_vals)
         if has_xid:
-            cvals["x_optimum_id"] = source_key
+            cvals["x_dopos_id"] = source_key
         rec_id = self.create(model, cvals)
         if rec_id is not None:
             state_map[source_key] = rec_id
@@ -562,7 +562,7 @@ def _to_decimal(v: Any) -> Decimal:
 
 
 def _normalize_rate(raw: Any) -> Decimal:
-    """OptimumPOS may store a BTW rate as 21, 21.0, 0.21, or a tax-table id.
+    """DoPos may store a BTW rate as 21, 21.0, 0.21, or a tax-table id.
     We normalize the common numeric forms to a percentage (21.0). A value <=1
     is treated as a fraction (0.21 -> 21). A value that looks like an id (e.g.
     a small integer that is NOT a known NL rate) is a TODO to resolve via the
@@ -667,7 +667,7 @@ def stage_products(
 
         rate_factor = Decimal("1") + rate / Decimal("100")
 
-        # SOURCE side of the money check: the customer-facing GROSS the OptimumPOS
+        # SOURCE side of the money check: the customer-facing GROSS the DoPos
         # terminal charged, derived from the source figure under the declared
         # convention, via its OWN independent formula:
         #   * source tax-INCLUSIVE -> the figure already IS the gross;
@@ -749,7 +749,7 @@ def stage_history(twin: Twin, odoo: Odoo, rep: Report, run: RunConfig) -> None:
     would double-count revenue and corrupt the Dutch CoA / BTW reporting.
 
     Default implementation only AGGREGATES history for the reconciliation
-    report. A real read-only import target (a custom x_optimum_sale model or a
+    report. A real read-only import target (a custom x_dopos_sale model or a
     CSV->BI export) is a per-client decision — see TODO.
     """
     LOG.info("== Stage 4: history (read-only summary; NOT replayed into pos.order) ==")
@@ -759,7 +759,7 @@ def stage_history(twin: Twin, odoo: Odoo, rep: Report, run: RunConfig) -> None:
     LOG.info("history summary: %d sales totalling %s (archived in twin; not posted)",
              rep.source_sales_count, rep.source_sales_total)
     # TODO(per-client): if a client needs history visible in Odoo, load into a
-    # dedicated x_optimum_sale read model here — NEVER into pos.order. Keep it
+    # dedicated x_dopos_sale read model here — NEVER into pos.order. Keep it
     # separate from accounting so no journal entries are fabricated.
 
 
@@ -967,7 +967,7 @@ def build_configs(args: argparse.Namespace) -> Tuple[TwinConfig, OdooConfig, Run
 # =============================================================================
 def main(argv: Optional[List[str]] = None) -> int:
     p = argparse.ArgumentParser(
-        description="Idempotent OptimumPOS(read-twin) -> Odoo 19 Community ETL.")
+        description="Idempotent DoPos(read-twin) -> Odoo 19 Community ETL.")
     p.add_argument("--client", help="client slug; loads clients/<slug>.env and "
                                      "defaults TWIN_MYSQL_DB / ODOO_DB to it.")
     p.add_argument("--dry-run", action="store_true",
@@ -996,7 +996,7 @@ def main(argv: Optional[List[str]] = None) -> int:
              run.client, run.dry_run, run.with_history, run.prices_tax_inclusive)
     if run.prices_tax_inclusive:
         LOG.warning("Assuming source prices are TAX-INCLUSIVE. CONFIRM against the "
-                    "real OptimumPOS schema/dump before trusting migrated prices.")
+                    "real DoPos schema/dump before trusting migrated prices.")
 
     rep = Report()
     twin = Twin(twin_cfg)

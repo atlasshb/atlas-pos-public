@@ -35,7 +35,7 @@ does.
 - **What:** the tailnet is the sole transport between pos-hub and every client box (program principle
   #7 — MySQL `:3306` / RDP / Odoo `:8069` are reachable on the tailnet only, never publicly exposed).
 - **venue-b-till today:** node `venue-b-till`, Tailscale IP `192.0.2.10`. Reachable services over the
-  tailnet: OptimumPOS MySQL `:3306` (live terminal, powered off/on often), Odoo 19 Community staging
+  tailnet: DoPos MySQL `:3306` (live terminal, powered off/on often), Odoo 19 Community staging
   `:8069`, SMB `:445` open. RDP/SSH/WinRM are **closed** — there is currently no execution path from the
   hub onto this box.
 - **Used by:** `scripts/pos-mirror.sh` (capability B — the read-only `mysqldump` pull + twin + restic

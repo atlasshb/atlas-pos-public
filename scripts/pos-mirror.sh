@@ -3,7 +3,7 @@
 # pos-mirror.sh — Atlas POS program, capability B (TWIN / MIRROR / BACKUP)
 # ---------------------------------------------------------------------------
 # Runs ON pos-hub (the always-on hub). For ONE client, this does a hub-
-# initiated PULL of that client's live OptimumPOS MySQL over Tailscale and:
+# initiated PULL of that client's live DoPos MySQL over Tailscale and:
 #
 #   1. gates on reachability  (terminal off => clean skip, exit 0, no error)
 #   2. takes a READ-ONLY, consistent logical dump (mysqldump --single-transaction)
@@ -41,7 +41,7 @@
 #     MYSQL_HOST   tailnet IP or MagicDNS name of the terminal (e.g. 192.0.2.10)
 #     MYSQL_USER   dedicated read-only MySQL user
 #     MYSQL_PW     its password
-#     MYSQL_DB     the OptimumPOS database name to mirror
+#     MYSQL_DB     the DoPos database name to mirror
 # Optional:
 #     MYSQL_PORT             (default 3306)
 #     TWIN_CONTAINER         (default atlas-mariadb-<client>)
@@ -84,7 +84,7 @@ usage() {
   cat >&2 <<EOF
 Usage: ${PROG} <client>
 
-Pulls <client>'s OptimumPOS MySQL up to pos-hub over Tailscale, stores a
+Pulls <client>'s DoPos MySQL up to pos-hub over Tailscale, stores a
 versioned encrypted backup, refreshes the per-client read-twin, and ships to
 Backblaze B2. Read-only against the terminal. If the terminal is offline it
 skips cleanly (exit 0) — safe to run from cron / a systemd timer.
@@ -297,7 +297,7 @@ if [[ "$dump_rc" -ne 0 || "$gzip_rc" -ne 0 ]]; then
   exit 4
 fi
 
-# Sanity: a real OptimumPOS dump is never tiny. Guard against a truncated/empty file.
+# Sanity: a real DoPos dump is never tiny. Guard against a truncated/empty file.
 dump_bytes="$(stat -c %s "$PART" 2>/dev/null || echo 0)"
 if [[ "$dump_bytes" -lt 200 ]]; then
   rm -f "$PART"

@@ -26,7 +26,7 @@ flowchart LR
    signed DPA and a quiet window (run when the venue is closed).
 4. **Map** — entity-by-entity mapping (`migration/MAPPING.md`).
 5. **ETL** — idempotent, `OPT-<PK>` idempotency keys, **dry-run first**
-   (`migration/optimumpos_to_odoo.py`).
+   (`migration/dopos_to_odoo.py`).
 6. **Parallel run** — both systems live until staff are comfortable.
 7. **Cut over** — one service at a time, old system stopped (not deleted).
 

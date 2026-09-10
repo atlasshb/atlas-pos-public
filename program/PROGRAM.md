@@ -6,7 +6,7 @@
 **Last updated:** 2026-06-30
 
 > ## ‼️ CURRENT PHASE = PREPARATION + TESTING ONLY
-> Operator standing rule (2026-06-30): **NO cutover, NO go-live, NO stopping/replacing any live OptimumPOS,
+> Operator standing rule (2026-06-30): **NO cutover, NO go-live, NO stopping/replacing any live DoPos,
 > NO real payment processing — until explicit, per-client consent in a quiet window.**
 > Allowed now: read-only mirror/twin/backup, building per-client Odoo, ETL into **staging** DBs (`--dry-run`
 > first), and config validation. Every cutover step in the ROADMAP is FROZEN behind that consent gate.
@@ -15,7 +15,7 @@
 
 ## 1. Goal
 
-Replace the incumbent commercial Windows POS ("OptimumPOS") across every Atlas hospitality/retail
+Replace the incumbent commercial Windows POS ("DoPos") across every Atlas hospitality/retail
 client with an **Atlas-owned Odoo 19 Community POS**, while continuously mirroring each client's live
 business data up to the VPS as a queryable twin and disaster-recovery backup.
 
@@ -24,7 +24,7 @@ client, safely, reversibly.**
 
 End state, per client:
 - The client runs an Atlas-operated Odoo Community POS (Dutch BTW, manual Worldline card method).
-- OptimumPOS is retired.
+- DoPos is retired.
 - pos-hub holds a live read-twin + encrypted offsite backups of that client's business data.
 
 ---
@@ -88,11 +88,11 @@ Find every client and every POS terminal in the fleet — including sites not ye
 - For unenrolled sites (Venue C and likely others), this is a **consent + hardware** step:
   the operator/client agrees to install Tailscale during a visit or remote-assisted session — never
   a network sweep.
-- Output: one git-versioned inventory record per client (tailnet node/IP, OptimumPOS version, MySQL
+- Output: one git-versioned inventory record per client (tailnet node/IP, DoPos version, MySQL
   endpoint, quiet window, hardware models, BTW registration, migration phase).
 
 ### B. Twin / Mirror / Backup — the safety spine
-Continuously and read-only pull each client's OptimumPOS MySQL up to pos-hub.
+Continuously and read-only pull each client's DoPos MySQL up to pos-hub.
 - **Mechanism:** scheduled logical `mysqldump --single-transaction` (read-only, no server-config
   change on the live box, consistent InnoDB snapshot, naturally idempotent, trivially resumable after
   a power-off). **Not** a MySQL replica and **not** binlog/CDC — both require intrusive config on a
@@ -187,14 +187,14 @@ The program reuses, not replaces, what is already running:
   scripts/pos-mirror.sh              # capability B: COMBINED pull + twin-load + restic (per client)
   scripts/pos-verify.sh              # capability B: weekly restore-drill
   scripts/odoo-provision-client.sh   # capability C: build per-client Odoo DB + module
-  migration/optimumpos_to_odoo.py    # capability C: twin -> Odoo XML-RPC ETL (idempotent)
-  migration/MAPPING.md               # OptimumPOS -> Odoo entity/field map
+  migration/dopos_to_odoo.py    # capability C: twin -> Odoo XML-RPC ETL (idempotent)
+  migration/MAPPING.md               # DoPos -> Odoo entity/field map
   governance/INTEGRATION.md          # Mind gate / policy.json / GDPR / ntfy topics
   systemd/pos-mirror@.{service,timer}# per-client timer units for pos-mirror.sh
   clients/<client>/                  # runtime: env(600), twin.pw(600), status.json, dumps/, logs/
   clients/<client>.yml               # capability C per-client descriptor (db/company/lang/btw/...)
 /root/odoo_migration/addons/         # generated atlas_<client>_pos modules (template atlas_pos_seed)
-/root/pos_kb/                        # canonical OptimumPOS schema map (reusable across sites)
+/root/pos_kb/                        # canonical DoPos schema map (reusable across sites)
 ```
 
 Secrets live in per-client env files (`chmod 600`, gitignored), referenced never committed, backed up
@@ -206,8 +206,8 @@ to a single locked-down encrypted B2 path so a hub rebuild can recover them.
 
 | Client | Tailnet node | What's there | Status |
 |---|---|---|---|
-| **Venue A** | `venue-a-till` (`192.0.2.10`) | OptimumPOS, MySQL `:3306`, SMB `:445`. Live restaurant. | Highest live-risk; migrate second |
-| **Venue B** | `venue-b-till` (`192.0.2.10`) | OptimumPOS MySQL `:3306` **and** Odoo 19 CE on `:8069` (db `venue_b`). Turkish tailor, powered off often. | Mid-migration; finish first |
+| **Venue A** | `venue-a-till` (`192.0.2.10`) | DoPos, MySQL `:3306`, SMB `:445`. Live restaurant. | Highest live-risk; migrate second |
+| **Venue B** | `venue-b-till` (`192.0.2.10`) | DoPos MySQL `:3306` **and** Odoo 19 CE on `:8069` (db `venue_b`). Turkish tailor, powered off often. | Mid-migration; finish first |
 | **Venue C** | not confirmed on tailnet | Known client, node not yet enrolled | Discovery + enrollment pending |
 | **Others** | unknown | Likely exist, not yet enrolled | Discovery is part of the job |
 

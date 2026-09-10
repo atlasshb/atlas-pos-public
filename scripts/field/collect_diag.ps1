@@ -45,7 +45,7 @@ $out.mysql_svc = Get-Service -Name 'MySQL*','mariadb*' | Select-Object Name, Sta
 $out.mysql_listen = Get-NetTCPConnection -State Listen -LocalPort 3306 -ErrorAction SilentlyContinue | Select-Object LocalAddress
 
 # Installed POS software
-$out.installed_pos = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*' | Where-Object { $_.DisplayName -match 'kassa|optimum|pos|epson|aclas|citizen|star|splashtop|verifone|yomani|sam4s|snbc' } | Select-Object DisplayName, DisplayVersion, InstallDate
+$out.installed_pos = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*' | Where-Object { $_.DisplayName -match 'kassa|dopos|dobizz|pos|epson|aclas|citizen|star|splashtop|verifone|yomani|sam4s|snbc' } | Select-Object DisplayName, DisplayVersion, InstallDate
 
 # Splashtop
 $out.splashtop_svc = Get-Service -Name '*splashtop*' | Select-Object Name, Status

@@ -22,12 +22,6 @@ SOFTWARE.
 
 ---
 
-NOTE ON MODULE LICENSING
-
-The Odoo modules under `addons/` are licensed under the GNU Lesser General
-Public License v3.0 (LGPL-3.0), matching the Odoo ecosystem and the upstream
-Pin Vandaag module. In particular, `addons/pos_pinvandaag_atlas` is a modified
-fork of `pos_pinvandaag` by PIN Vandaag B.V. (LGPL-3.0); see `NOTICE.md`.
-
-The documents under `docs/`, `program/`, `migration/`, `scripts/`, `runbooks/`
-and `systemd/` are provided under the MIT license above.
+The Odoo modules under `addons/` are licensed under LGPL-3.0 (see each
+module's `LICENSE`), as is the upstream `pos_pinvandaag` module they derive
+from. See `NOTICE.md` for attribution.

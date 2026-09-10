@@ -1,7 +1,7 @@
-# Runbook — create the read-only MySQL user on an OptimumPOS terminal (L1)
+# Runbook — create the read-only MySQL user on an DoPos terminal (L1)
 
 **What:** create the dedicated, read-only MySQL user that `scripts/pos-mirror.sh`
-uses to pull a client's OptimumPOS database up to the hub. This is the one
+uses to pull a client's DoPos database up to the hub. This is the one
 **manual L1 step** every mirror depends on — the mirror cannot run until it
 exists, and it must be provably unable to write or escalate.
 
@@ -25,7 +25,7 @@ afterwards is strictly read-only.
 
 2. **Edit and run** [`create-readonly-mysql-user.sql`](./create-readonly-mysql-user.sql).
    Replace the placeholders first:
-   - `<OPTIMUM_DB>` — the OptimumPOS database name (confirm with `SHOW DATABASES;`).
+   - `<dopos_DB>` — the DoPos database name (confirm with `SHOW DATABASES;`).
    - `<RO_PASSWORD>` — a strong random password. This becomes `MYSQL_PW` in the
      client's env file.
 
@@ -40,7 +40,7 @@ afterwards is strictly read-only.
      MYSQL_HOST=<terminal tailnet IP>
      MYSQL_USER=atlas_ro
      MYSQL_PW=<RO_PASSWORD>
-     MYSQL_DB=<OPTIMUM_DB>
+     MYSQL_DB=<dopos_DB>
    ```
 
    See `clients/_TEMPLATE/env.example` for the full file.
@@ -52,7 +52,7 @@ afterwards is strictly read-only.
 Run the checks at the bottom of the `.sql` file. In short:
 
 - **Inspect the grants** — they must list only
-  `SELECT, SHOW VIEW, TRIGGER, EVENT, EXECUTE ON \`<OPTIMUM_DB>\`.*` (plus a
+  `SELECT, SHOW VIEW, TRIGGER, EVENT, EXECUTE ON \`<dopos_DB>\`.*` (plus a
   `USAGE` line). There must be **no** `ALL PRIVILEGES`, **no** `*.*`, **no**
   `WITH GRANT OPTION`, and **no** `INSERT/UPDATE/DELETE/DROP/CREATE`:
 
@@ -72,7 +72,7 @@ Run the checks at the bottom of the `.sql` file. In short:
   Connect as the new user to run these:
 
   ```sh
-  mysql -h <terminal tailnet IP> -u atlas_ro -p <OPTIMUM_DB>
+  mysql -h <terminal tailnet IP> -u atlas_ro -p <dopos_DB>
   ```
 
 If any write/grant test **succeeds**, the user is over-privileged. Drop it and

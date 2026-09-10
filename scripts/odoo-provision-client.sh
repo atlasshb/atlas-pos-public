@@ -549,7 +549,7 @@ main() {
   log "Next steps:"
   log "  1. Confirm l10n_nl fiscal package + default tax (MANUAL, pre-sale)."
   log "  2. Run the ETL from the read-twin:"
-  log "       migration/optimumpos_to_odoo.py --client ${CLIENT} --dry-run"
+  log "       migration/dopos_to_odoo.py --client ${CLIENT} --dry-run"
   log "  3. Reconcile counts/totals, then parallel-run before cutover."
   log "Rollback for this build = drop DB '${DB_NAME}' (no client terminal touched)."
   log "============================================================"

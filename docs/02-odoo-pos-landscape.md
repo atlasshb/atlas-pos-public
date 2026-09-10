@@ -189,7 +189,7 @@ Pin Vandaag's GitHub org (`Pin-Voordeel-Bv`) has **no Odoo repo** — only PHP l
 
 - General: **helpdesk@pinvandaag.nl**, **+31 85 5601201**. Developer/API support: **085 5601203** (per V1 docs).
 - Module registration: <https://aanmelden.pinportal.nl/external/register-form>.
-- Partner program: <https://www.pinvandaag.nl/partners/> (Kassa Partners include Taurus, Bos Systemen, WaiterOne, Optimum POS, etc.; terminal suppliers CCV/Worldline/Ingenico/Sepay). **[UNCERTAIN — exact commission/revenue-share terms not published; request the partner agreement directly. The `samenwerken` page 404'd and the BE kassa-partner page 522'd at fetch time.]**
+- Partner program: <https://www.pinvandaag.nl/partners/> (Kassa Partners include Taurus, Bos Systemen, WaiterOne, DoPos, etc.; terminal suppliers CCV/Worldline/Ingenico/Sepay). **[UNCERTAIN — exact commission/revenue-share terms not published; request the partner agreement directly. The `samenwerken` page 404'd and the BE kassa-partner page 522'd at fetch time.]**
 
 Sources: <https://www.pinvandaag.nl/odoo-koppeling/>, <https://www.pinvandaag.nl/kassa-koppeling/>, <https://www.pinvandaag.nl/docs/rest-api/>, <https://www.pinvandaag.nl/docs/rest-api-2/>, <https://www.pinvandaag.nl/partners/>, <https://www.pinvandaag.nl/product/worldline-yomani-xr-ml/>, <https://github.com/orgs/Pin-Voordeel-Bv/repositories>, <https://apps.odoo.com/apps/modules/17.0/pos_pinvandaag>
 

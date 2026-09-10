@@ -46,7 +46,7 @@ and hardware partners we work with.
 | `04-pinvandaag-integration.md` | Pin Vandaag REST API v2 integration |
 | `05-payments-architecture.md` | Payment provider boundaries, never-store-PAN |
 | `06-migration-strategy.md` | Bridge-first, read-only-twin migration |
-| `07-optimumpos-gap-analysis.md` | What an incumbent POS does that we had to match |
+| `07-dopos-gap-analysis.md` | What an incumbent POS does that we had to match |
 | `08-system-context.md` | Actors and ownership boundaries |
 | `09-security-compliance.md` | Security & compliance requirements |
 | `10-device-printing.md` | Terminals, printers, peripherals |

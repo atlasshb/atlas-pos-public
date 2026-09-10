@@ -2,7 +2,7 @@
 
 Prereqs (the part that needs reach — operator or MeshCentral):
   1. The customer's POS box is on the Tailscale mesh -> you have its tailnet IP.
-  2. Its kassa MySQL has a remote-capable user (OptimumPOS ships 'remote'@'%').
+  2. Its kassa MySQL has a remote-capable user (DoPos ships 'remote'@'%').
 
 Then:
   python onboard_customer.py --slug venue-l --name "Venue L" \

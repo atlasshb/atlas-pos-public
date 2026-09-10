@@ -1,49 +1,49 @@
-# OptimumPOS (MySQL) → Odoo 19 Community — Data Model Mapping
+# DoPos (MySQL) → Odoo 19 Community — Data Model Mapping
 
 **Scope.** This is the canonical, entity-by-entity mapping used by the Atlas POS ETL
-(`optimum_etl.py`) to migrate each client's OptimumPOS catalogue/config into a per-client
+(`dopos_etl.py`) to migrate each client's DoPos catalogue/config into a per-client
 Odoo 19 Community database. It is the source-of-truth referenced by capability C (Replace).
 
 **Three rules that govern this whole document — do not violate:**
 
 1. **The ETL reads the read-twin on pos-hub, never the live terminal.** Capability B keeps a
-   per-client MariaDB twin (`atlas-mariadb-<client>`) synced from each OptimumPOS box over
+   per-client MariaDB twin (`atlas-mariadb-<client>`) synced from each DoPos box over
    Tailscale. The ETL connects to the twin. An ETL bug can therefore never lock tables or slow
    a live card-payment terminal. The only thing that touches the terminal is B's read-only pull,
    per-site, in a quiet window.
 2. **Idempotent upsert keyed on a stable source PK.** Every migrated record carries an
-   `OPT-<sourcePK>` key (in `default_code` for products, or an `x_optimum_id` char field on other
+   `OPT-<sourcePK>` key (in `default_code` for products, or an `x_dopos_id` char field on other
    models). The ETL searches by that key, then writes (refresh of safe fields only) or creates.
    Re-running converges; it never duplicates. **Human-edited prices are never clobbered on re-run.**
 3. **Worldline stays a MANUAL card payment method.** Odoo 19 Community has no integrated
    payment-terminal module (`pos_six`/`pos_adyen`/`pos_iot` are Enterprise-only and won't install).
-   All OptimumPOS card/pin variants collapse to ONE manual bank payment method; `use_payment_terminal`
+   All DoPos card/pin variants collapse to ONE manual bank payment method; `use_payment_terminal`
    is left unset.
 
-> **CRITICAL CAVEAT — the source schema is not yet confirmed.** The exact OptimumPOS MySQL table/column
-> names below are by ROLE, inferred from the documented OptimumPOS entity set (products, categories,
+> **CRITICAL CAVEAT — the source schema is not yet confirmed.** The exact DoPos MySQL table/column
+> names below are by ROLE, inferred from the documented DoPos entity set (products, categories,
 > prices, taxes/BTW, payment methods, sales/tickets, staff). They are placeholders until verified against
 > a real dump. Section 11 (Confirming the real schema) is mandatory before the ETL is trusted on any site.
-> Schema may also vary by OptimumPOS build/version per client — re-run the confirmation steps per site and
+> Schema may also vary by DoPos build/version per client — re-run the confirmation steps per site and
 > record per-client deltas.
 
 ---
 
 ## 0. Conventions
 
-- **Source** = a table/column in the OptimumPOS MySQL schema (as seen in the read-twin).
+- **Source** = a table/column in the DoPos MySQL schema (as seen in the read-twin).
 - **Target** = an Odoo 19 model/field.
 - **Key** = the stable idempotency key written into Odoo so re-runs upsert.
 - **Direction of truth on re-run**: fields marked **(seed-once)** are written on create and NOT
   overwritten on re-run (so manual edits survive). Fields marked **(re-assert)** are refreshed every run.
-- **Money**: Odoo `list_price` is **tax-exclusive**. OptimumPOS price inclusivity is UNCONFIRMED —
+- **Money**: Odoo `list_price` is **tax-exclusive**. DoPos price inclusivity is UNCONFIRMED —
   see Section 4 and the conversion rule. Get this wrong and every price is off by the BTW rate.
 
 ---
 
 ## 1. Products / articles → `product.template`
 
-| Source (OptimumPOS, by role) | Target (Odoo 19) | Key / Rule | Re-run |
+| Source (DoPos, by role) | Target (Odoo 19) | Key / Rule | Re-run |
 |---|---|---|---|
 | `products.id` (PK) | `product.template.default_code` = `OPT-<id>` | idempotency key | re-assert |
 | `products.name` | `product.template.name` | | re-assert |
@@ -57,7 +57,7 @@ Odoo 19 Community database. It is the source-of-truth referenced by capability C
 | `products.active` / archived flag | `product.template.active` | inactive source → archived in Odoo | re-assert |
 
 **Notes / ambiguities:**
-- `type`: OptimumPOS may not distinguish goods vs service cleanly. Default everything to `consu`;
+- `type`: DoPos may not distinguish goods vs service cleanly. Default everything to `consu`;
   only set `service` where the source clearly marks labour/non-stock. `combo` only if the source has
   true bundle/menu items (restaurant menus — Venue A may; tailor — Venue B likely not).
 - Stock: do NOT import stock quantities by default. POS clients run `consu` items without inventory
@@ -70,7 +70,7 @@ Odoo 19 Community database. It is the source-of-truth referenced by capability C
 
 | Source | Target | Key / Rule | Re-run |
 |---|---|---|---|
-| `categories.id` (PK) | `pos.category` with `x_optimum_id = OPT-<id>` | till grouping (what cashier sees) | re-assert |
+| `categories.id` (PK) | `pos.category` with `x_dopos_id = OPT-<id>` | till grouping (what cashier sees) | re-assert |
 | `categories.name` | `pos.category.name` | | re-assert |
 | `categories.parent_id` | `pos.category.parent_id` ← mapped parent | resolve parent by its own `OPT-<id>` first (two-pass) | re-assert |
 | `categories.id` | `product.category` (internal) | optional, only if internal categ used for accounting | seed-once |
@@ -85,8 +85,8 @@ Odoo 19 Community database. It is the source-of-truth referenced by capability C
 ## 3. Prices → `product.template.list_price`
 
 Covered structurally in §1. The decision that makes or breaks correctness is **tax inclusivity** (§4).
-- If OptimumPOS stores **tax-exclusive** net prices → copy `list_price` directly.
-- If OptimumPOS stores **tax-inclusive** gross prices → `list_price = gross / (1 + rate)` AND set the
+- If DoPos stores **tax-exclusive** net prices → copy `list_price` directly.
+- If DoPos stores **tax-inclusive** gross prices → `list_price = gross / (1 + rate)` AND set the
   matching tax so the till re-grosses to the original shelf price.
 - Price is **seed-once**: re-runs do NOT overwrite, so a price a human corrected in Odoo stays corrected.
 
@@ -113,7 +113,7 @@ per-company, e.g. `account.<company_id>_btw_21` — hardcoding breaks across DBs
   gate; the ETL must refuse to proceed if no resolvable BTW taxes exist in the company.
 
 **Ambiguity / inclusivity detection (decides §3 too):**
-- OptimumPOS may store prices **tax-inclusive** (common for hospitality shelf pricing) or **tax-exclusive**.
+- DoPos may store prices **tax-inclusive** (common for hospitality shelf pricing) or **tax-exclusive**.
 - **How to detect per site:** pick a handful of products with a known BTW rate, read their source price and
   source line-tax on a sample ticket. If `ticket_line.gross == price` and `tax == gross - gross/(1+rate)`,
   prices are **inclusive**. If `ticket_line.net == price`, prices are **exclusive**. Confirm with the
@@ -132,10 +132,10 @@ per-company, e.g. `account.<company_id>_btw_21` — hardcoding breaks across DBs
 
 **Rules:**
 - Created with `noupdate="1"` semantics in the seed module; the ETL only ADDS methods not already present
-  (matched by name / `x_optimum_id`), never rewires existing ones.
+  (matched by name / `x_dopos_id`), never rewires existing ones.
 - Journals linked by SEARCH on (`company_id`, `type`) in the module's `post_init_hook` — never by xmlid.
 - **Never** create an integrated-terminal method. Cashier runs the standalone Worldline YOMANI physically;
-  Odoo records the tendered amount on the manual method. PAN/cardholder data never enters OptimumPOS or
+  Odoo records the tendered amount on the manual method. PAN/cardholder data never enters DoPos or
   the twin (Worldline is standalone) — this keeps Atlas out of PCI scope. Do not import any card data even
   if a column appears to hold it; treat such a column as out-of-scope and flag it.
 
@@ -145,7 +145,7 @@ per-company, e.g. `account.<company_id>_btw_21` — hardcoding breaks across DBs
 
 | Source | Target | Rule |
 |---|---|---|
-| `staff.id` / `staff.name` | `hr.employee` with `x_optimum_id = OPT-<id>` | name only, for sales attribution / cashier list |
+| `staff.id` / `staff.name` | `hr.employee` with `x_dopos_id = OPT-<id>` | name only, for sales attribution / cashier list |
 | `staff.pin` / `staff.password` | **DO NOT IMPORT** | secrets/credentials never bulk-copied (constraint 4); GDPR/PII risk |
 
 **Rules:**
@@ -166,7 +166,7 @@ per-company, e.g. `account.<company_id>_btw_21` — hardcoding breaks across DBs
 | `tickets` / `sales` (closed) + `ticket_lines` | **Twin archive only** (capability B). NOT `pos.order`. | Replaying closed tickets as live `pos.order` fabricates `pos.session` + `account.move` journal entries in the live Dutch CoA → double-counts revenue, corrupts BTW reporting, and is a fiscal hazard (violates "don't touch accounting"). |
 
 **Opt-in alternative (per client, only if the accountant needs history INSIDE Odoo):**
-- Load sales as a **read-only reporting dataset** — a custom `x_optimum_sale` model (or CSV→BI/Metabase) that
+- Load sales as a **read-only reporting dataset** — a custom `x_dopos_sale` model (or CSV→BI/Metabase) that
   is explicitly **separate from accounting**, carries no journal entries, and is clearly labelled historical.
 - Never as `pos.order`/`account.move`. The twin remains the legal/queryable system-of-record for history and
   satisfies NL 7-year fiscal retention via restic→B2 (see governance INTEGRATION.md §retention).
@@ -207,7 +207,7 @@ Output a per-client reconciliation report (counts, mismatches, unmapped categori
 
 ## 10. Idempotency & re-run summary
 
-- Products keyed on `default_code = OPT-<pk>`; everything else on `x_optimum_id`.
+- Products keyed on `default_code = OPT-<pk>`; everything else on `x_dopos_id`.
 - Re-run = upsert: search by key → create if absent, else write **re-assert** fields only.
 - **Never overwritten on re-run:** `list_price` (price), `type`, internal `categ_id` (all seed-once) — so
   human corrections survive.
@@ -218,7 +218,7 @@ Output a per-client reconciliation report (counts, mismatches, unmapped categori
 
 ## 11. Confirming the REAL schema from a live dump (MANDATORY before trusting the ETL per site)
 
-The column names above are by role and must be pinned to the actual OptimumPOS schema **in the twin** (never
+The column names above are by role and must be pinned to the actual DoPos schema **in the twin** (never
 the live box). Per site (Venue A twin, Venue B twin):
 
 1. **List tables & engines** (engine drives B's dump safety too — MyISAM ≠ consistent under `--single-transaction`):
@@ -239,22 +239,22 @@ the live box). Per site (Venue A twin, Venue B twin):
    category tree, price field, VAT/BTW rate field, payment-type list, ticket header + ticket lines, staff list.
 4. **Confirm price inclusivity** using the sample-ticket method in §4.
 5. **Pin foreign keys**: product→category, ticket_line→product, ticket_line→tax, ticket→staff, ticket→payment.
-6. **Record per-client deltas**: write the confirmed table/column map into `/root/pos_kb/optimum_schema_<client>.md`
+6. **Record per-client deltas**: write the confirmed table/column map into `/root/pos_kb/dopos_schema_<client>.md`
    (the canonical schema KB). If a client's build differs, this file captures the delta so the reusable map stays honest.
-7. **Schema-fingerprint** (hash of table+column list) stored per client; B/ETL alert on drift so an OptimumPOS update
+7. **Schema-fingerprint** (hash of table+column list) stored per client; B/ETL alert on drift so an DoPos update
    that changes the schema is caught, not silently mis-mapped.
 
-Only after steps 1–6 are recorded for a site is `optimum_etl.py` trusted to run against that site's twin.
+Only after steps 1–6 are recorded for a site is `dopos_etl.py` trusted to run against that site's twin.
 
 ---
 
 ## 12. Open mapping questions (carry into per-site confirmation)
 
-- Exact OptimumPOS table/column names per site (above is by role) — pin from the twin (Venue A 192.0.2.10,
+- Exact DoPos table/column names per site (above is by role) — pin from the twin (Venue A 192.0.2.10,
   Venue B 192.0.2.10) before finalizing the column map.
 - Tax-inclusive vs tax-exclusive prices per site — determines the `list_price` conversion and `taxes_id` setting.
 - Venue A (restaurant): does it need `pos.floor`/`pos.table`, split bills, course/modifier handling — i.e. does
   the single-counter Venue B template generalize, or is a restaurant `pos.config` variant needed?
 - Does any client want history visible inside Odoo (opt-in §7 reporting dataset) or is twin-only archival enough?
-- Does OptimumPOS use InnoDB or MyISAM (affects B's dump consistency, not the mapping, but confirm during step 1).
+- Does DoPos use InnoDB or MyISAM (affects B's dump consistency, not the mapping, but confirm during step 1).
 - Multi-till sites: does any client run more than one terminal (changes §8 open-order topology and system-of-record)?

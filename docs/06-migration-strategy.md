@@ -7,7 +7,7 @@ Default to `Bridge First`.
 The first question is not "can Atlas POS replace this system?"
 It is "can Atlas POS create enough operational value while the current system stays in place?"
 
-## Track A: Keep OptimumPOS, Integrate To Odoo And Atlas
+## Track A: Keep DoPos, Integrate To Odoo And Atlas
 
 ### Expected Customer Shape
 

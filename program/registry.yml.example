@@ -22,7 +22,7 @@
 #     display_name:     human label shown in the inventory table        (-> name)
 #     tailnet_host:     tailnet IP or MagicDNS name of the terminal      (-> host)
 #     node:             tailscale node hostname (for IP<->client match)
-#     optimum_db:       the OptimumPOS MySQL database name on that box
+#     dopos_db:       the DoPos MySQL database name on that box
 #     dpa_signed_date:  YYYY-MM-DD the GDPR/AVG DPA was signed, or null
 #     quiet_window:     local HH:MM-HH:MM the mirror may pull in
 #     mirror_enabled:   declared intent only — the ENFORCING flag is MIRROR_ENABLED
@@ -50,7 +50,7 @@ clients:
     tailnet_host:    "192.0.2.10"
     host:            "192.0.2.10"
     node:            "venue-a-till"
-    optimum_db:      "optimumpos"        # CONFIRM the real db name on first inspection
+    dopos_db:      "dopos"        # CONFIRM the real db name on first inspection
     dpa_signed_date: null                # not yet signed -> mirror stays OFF
     quiet_window:    "01:00-06:00"       # restaurant; pull only when closed
     mirror_enabled:  false               # declarative; enforcing flag is in clients/venue_a/env
@@ -63,7 +63,7 @@ clients:
     tailnet_host:    "192.0.2.10"
     host:            "192.0.2.10"
     node:            "venue-b-till"
-    optimum_db:      "optimumpos"        # CONFIRM the real db name on first inspection
+    dopos_db:      "dopos"        # CONFIRM the real db name on first inspection
     dpa_signed_date: null                # fill in YYYY-MM-DD once signed
     quiet_window:    "01:00-06:00"       # Turkish tailor; powered off often
     mirror_enabled:  false               # declarative; enforcing flag is in clients/venue_b/env
@@ -76,7 +76,7 @@ clients:
   #   tailnet_host:    ""
   #   host:            ""
   #   node:            ""
-  #   optimum_db:      "optimumpos"
+  #   dopos_db:      "dopos"
   #   dpa_signed_date: null
   #   quiet_window:    "01:00-06:00"
   #   mirror_enabled:  false

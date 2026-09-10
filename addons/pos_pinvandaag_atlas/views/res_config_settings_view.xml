@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: LGPL-3.0-only | Copyright (c) PIN Vandaag B.V. — original pos_pinvandaag (LGPL-3.0); modified by Atlas Corporation 2026 -->
 <odoo>
     <record id="res_config_settings_view_form_inherit_pos_pinvandaag" model="ir.ui.view">
         <field name="name">res.config.settings.form.inherit.pos.pinvandaag</field>

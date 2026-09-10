@@ -42,7 +42,7 @@ time of writing:
 
 ## Competitive landscape (NL hospitality POS)
 
-- **Incumbent closed POS**: OptimumPOS, DoPOS, CCV, Lightspeed Restaurant,
+- **Incumbent closed POS**: DoPos, DoPOS, CCV, Lightspeed Restaurant,
   MplusKASSA, unTill, Bork, SumUp/Zettle, Square.
 - **Ordering/delivery platforms** take a meaningful commission (marketplaces
   commonly ~13–30%); commission-free ordering sites (e.g. Foodticket, Sitedish,

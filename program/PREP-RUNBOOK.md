@@ -6,7 +6,7 @@
 > ## ‼️ CUTOVER IS FROZEN
 > This runbook covers ONLY what is allowed right now: **read-only mirror / twin / backup,
 > per-client Odoo build, and ETL `--dry-run` into staging.** It does **NOT** cover cutover, go-live,
-> stopping/replacing any live OptimumPOS, or processing real payments. Every one of those is FROZEN
+> stopping/replacing any live DoPos, or processing real payments. Every one of those is FROZEN
 > behind explicit, per-client written consent in a quiet window (see ROADMAP.md §3–§4). Nothing in
 > this document touches a live terminal except (1) the one-time read-only MySQL user creation
 > (`runbooks/create-readonly-mysql-user.sql`, an L1 step done with client consent) and (2) the
@@ -20,7 +20,7 @@ cd /opt/atlas-pos
 ```
 
 The script names below are the ACTUAL shipped layout (combined mirror script; no separate
-`pos_pull.sh` / `pos_load_twin.sh` / `optimum_etl.py`):
+`pos_pull.sh` / `pos_load_twin.sh` / `dopos_etl.py`):
 
 | Capability | Script | What it does |
 |---|---|---|
@@ -28,7 +28,7 @@ The script names below are the ACTUAL shipped layout (combined mirror script; no
 | B Mirror | `scripts/pos-mirror.sh <client>` | **combined** pull + twin-load + restic→B2 (fail-closed gate) |
 | B Verify | `scripts/pos-verify.sh <client>` | restore-drill: restore newest dump into a throwaway container, assert |
 | C Build | `scripts/odoo-provision-client.sh --client <c>` | build the per-client Odoo 19 CE POS DB + module |
-| C ETL | `migration/optimumpos_to_odoo.py` | twin → Odoo XML-RPC upsert (idempotent; `--dry-run` first) |
+| C ETL | `migration/dopos_to_odoo.py` | twin → Odoo XML-RPC upsert (idempotent; `--dry-run` first) |
 | B timer | `systemd/pos-mirror@.{service,timer}` | per-client scheduling for `pos-mirror.sh` |
 
 ---
@@ -41,7 +41,7 @@ TCP probe — it sends no credentials and no SQL, and exits 0 even when terminal
 ```sh
 # one-time: create the non-secret registry from the template if you haven't already
 [ -f registry.yml ] || cp registry.yml.example registry.yml
-# edit registry.yml so venue_a + venue_b have the right tailnet_host / node / optimum_db
+# edit registry.yml so venue_a + venue_b have the right tailnet_host / node / dopos_db
 
 # run the read-only discovery (writes state/fleet-inventory.json + prints a table)
 scripts/fleet-inventory.sh
@@ -49,7 +49,7 @@ scripts/fleet-inventory.sh
 
 Read the table: `venue_a` and `venue_b` should show on the tailnet (status `online` when their box is
 up; `offline` is normal for the often-off Venue B tailor). Note the `POS(3306)` column — that is the
-OptimumPOS MySQL we will mirror.
+DoPos MySQL we will mirror.
 
 ---
 
@@ -74,7 +74,7 @@ Now edit `clients/$C/env` and fill in the real values. Leave the safety gate **O
 
 - `MYSQL_HOST` — the terminal's **tailnet** IP (must be `100.64.0.0/10`; the mirror refuses anything
   else). Venue B = `192.0.2.10`, Venue A = `192.0.2.10`.
-- `MYSQL_USER=atlas_ro`, `MYSQL_PW=<the password you set in step 2b>`, `MYSQL_DB=<OptimumPOS db>`.
+- `MYSQL_USER=atlas_ro`, `MYSQL_PW=<the password you set in step 2b>`, `MYSQL_DB=<DoPos db>`.
 - `RESTIC_REPOSITORY=b2:atlas-pos-backups:/$C`, `RESTIC_PASSWORD=<per-tenant>`, `B2_ACCOUNT_ID/KEY`.
 - `TWIN_MYSQL_*` / `ODOO_*` — used by the ETL in step 4; can be filled now or then.
 - Leave `TWIN_ROOT_PW` unset — `pos-mirror.sh` generates it once into `clients/$C/twin.pw` (0600).
@@ -86,12 +86,12 @@ the client present/consenting. Full procedure + read-only verification is in
 [`runbooks/create-readonly-mysql-user.md`](./runbooks/create-readonly-mysql-user.md); the SQL is
 [`runbooks/create-readonly-mysql-user.sql`](./runbooks/create-readonly-mysql-user.sql).
 
-On the terminal, as a MySQL admin, after replacing `<OPTIMUM_DB>` and `<RO_PASSWORD>`:
+On the terminal, as a MySQL admin, after replacing `<dopos_DB>` and `<RO_PASSWORD>`:
 
 ```sql
 -- from runbooks/create-readonly-mysql-user.sql
 CREATE USER IF NOT EXISTS 'atlas_ro'@'100.%.%.%' IDENTIFIED BY '<RO_PASSWORD>';
-GRANT SELECT, SHOW VIEW, TRIGGER, EVENT, EXECUTE ON `<OPTIMUM_DB>`.* TO 'atlas_ro'@'100.%.%.%';
+GRANT SELECT, SHOW VIEW, TRIGGER, EVENT, EXECUTE ON `<dopos_DB>`.* TO 'atlas_ro'@'100.%.%.%';
 FLUSH PRIVILEGES;
 SHOW GRANTS FOR 'atlas_ro'@'100.%.%.%';   -- must show ONLY the read grants above (+ USAGE)
 ```
@@ -205,7 +205,7 @@ values; export it and run without `--client` so the one consolidated env file is
 ```sh
 C=venue_a
 set -a; source clients/$C/env; set +a          # load TWIN_MYSQL_* + ODOO_* into the environment
-python migration/optimumpos_to_odoo.py --dry-run
+python migration/dopos_to_odoo.py --dry-run
 ```
 
 Read the printed reconciliation report carefully: product counts (migrated vs active source articles),
@@ -215,7 +215,7 @@ mismatch list means do NOT proceed** — it is the gate that would block any fut
 idempotent (keyed on `OPT-<sourcePK>`); it never duplicates and never clobbers human-edited prices.
 
 Only after the dry-run report is clean would you run the ETL for real (`python
-migration/optimumpos_to_odoo.py` without `--dry-run`) into the **staging** Odoo DB — still hub-only,
+migration/dopos_to_odoo.py` without `--dry-run`) into the **staging** Odoo DB — still hub-only,
 still not a cutover.
 
 ---

@@ -3,7 +3,7 @@
 # fleet-inventory.sh — Atlas POS program, capability A (DISCOVER + INVENTORY)
 # ---------------------------------------------------------------------------
 # Runs ON pos-hub (the always-on hub). Enumerates the Tailscale tailnet and,
-# for every peer, READ-ONLY-probes the ports that identify an OptimumPOS box
+# for every peer, READ-ONLY-probes the ports that identify an DoPos box
 # (MySQL :3306), an Odoo instance (:8069) and SMB file sharing (:445). It then
 # joins what it finds against the declarative client registry (registry.yml)
 # and the on-hub program state (twins, dumps, Odoo DBs) to classify each client
@@ -43,7 +43,7 @@ STATE_DIR="${STATE_DIR:-${POSOPS_ROOT}/state}"
 OUT_JSON="${OUT_JSON:-${STATE_DIR}/fleet-inventory.json}"
 
 # Ports we fingerprint. Keep these in one place.
-PORT_MYSQL="${PORT_MYSQL:-3306}"   # OptimumPOS local MySQL
+PORT_MYSQL="${PORT_MYSQL:-3306}"   # DoPos local MySQL
 PORT_ODOO="${PORT_ODOO:-8069}"     # Odoo web/xmlrpc
 PORT_SMB="${PORT_SMB:-445}"        # SMB file share
 
@@ -65,7 +65,7 @@ usage() {
   cat >&2 <<EOF
 Usage: ${0##*/} [-j] [-q] [-o OUT_JSON]
 
-Enumerates the Tailscale tailnet, read-only-probes each node for OptimumPOS
+Enumerates the Tailscale tailnet, read-only-probes each node for DoPos
 (MySQL :${PORT_MYSQL}), Odoo (:${PORT_ODOO}) and SMB (:${PORT_SMB}), and writes a
 fleet inventory (JSON + human table). Always read-only; never touches a terminal.
 
@@ -318,7 +318,7 @@ while IFS= read -r node; do
   # --- classification ------------------------------------------------------
   # enrolled : node is on our tailnet (true for everything we can see here)
   # discovered : enrolled but NOT yet present in registry.yml (unknown client)
-  # has_optimumpos : MySQL :3306 reachable
+  # has_dopos : MySQL :3306 reachable
   # has_odoo       : Odoo  :8069 reachable
   # mirrored : we hold at least one twin dump for the client on the hub
   # migrated : an Odoo DB for the client exists on atlas-odoo-db
@@ -361,7 +361,7 @@ while IFS= read -r node; do
       enrolled: $enrolled,
       discovered: $discovered,
       ports: { mysql_3306: $mysql_open, odoo_8069: $odoo_open, smb_445: $smb_open },
-      has_optimumpos: $mysql_open,
+      has_dopos: $mysql_open,
       has_odoo: $odoo_open,
       mirrored: $mirrored,
       migrated: $migrated,
@@ -408,7 +408,7 @@ while IFS= read -r r; do
       status: "offline", reachable: false,
       in_registry: true, enrolled: $enrolled, discovered: true,
       ports: { mysql_3306: false, odoo_8069: false, smb_445: false },
-      has_optimumpos: false, has_odoo: false,
+      has_dopos: false, has_odoo: false,
       mirrored: $mirrored, migrated: $migrated,
       last_pull_epoch: $last_pull_epoch
     }')"
@@ -432,7 +432,7 @@ DOC="$(jq -n \
     summary: {
       nodes_total:        ($nodes | length),
       online:             ($nodes | map(select(.reachable)) | length),
-      with_optimumpos:    ($nodes | map(select(.has_optimumpos)) | length),
+      with_dopos:    ($nodes | map(select(.has_dopos)) | length),
       with_odoo:          ($nodes | map(select(.has_odoo)) | length),
       enrolled:           ($nodes | map(select(.enrolled)) | length),
       mirrored:           ($nodes | map(select(.mirrored)) | length),
@@ -488,7 +488,7 @@ if [[ "$QUIET" -ne 1 ]]; then
     printf '%s\n' "$DOC" | jq -r '
       .summary
       | "Summary: \(.nodes_total) nodes  |  \(.online) online  |  "
-        + "\(.with_optimumpos) OptimumPOS  |  \(.with_odoo) Odoo  |  "
+        + "\(.with_dopos) DoPos  |  \(.with_odoo) Odoo  |  "
         + "\(.mirrored) mirrored  |  \(.migrated) migrated  |  "
         + "\(.discovered_unknown) unknown(not in registry)"
     '

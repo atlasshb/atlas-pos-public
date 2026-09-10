@@ -11,7 +11,7 @@
 #      root pw, NO published port, on a throwaway docker volume / tmpfs)
 #   3. loading the dump into it
 #   4. ASSERTING the restore is real: table count > 0, total row count > 0
-#      across user tables, and a few OptimumPOS sanity queries
+#      across user tables, and a few DoPos sanity queries
 #   5. tearing the whole thing down (container + volume) no matter what
 #   6. pushing the pass/fail result to ntfy (topic pos-mirror)
 #

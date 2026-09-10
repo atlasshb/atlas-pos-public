@@ -5,7 +5,7 @@
   This is a thin shell around the vendor's kassa.exe. It does NOT replace the POS
   -- it boots kassa.exe and continuously rewrites its visible chrome (window
   titles, optional auto-dismissal of vendor info popups) so the operator sees
-  Atlas POS, never DoPos/OptimumPOS.
+  Atlas POS, never DoPos/DoPos.
 
   Behaviour:
     1. Launch kassa.exe if not already running.
@@ -48,8 +48,8 @@ public static extern System.IntPtr SendMessage(System.IntPtr hWnd, uint msg, Sys
 # Anything matching the LHS gets rewritten to the RHS. Match is case-sensitive
 # exact match against the current window title.
 $Translate = @{
-    'OptimumPOS'                        = 'Atlas POS'
-    'Optimum POS'                       = 'Atlas POS'
+    'DoPos'                        = 'Atlas POS'
+    'DoPos'                       = 'Atlas POS'
     'DoPos'                             = 'Atlas POS'
     'DoBizz'                            = 'Atlas POS'
     'Kassa'                             = 'Atlas POS'
@@ -61,8 +61,8 @@ $Translate = @{
 # Substring -> replacement, applied after exact-match lookup misses. Useful for
 # popups whose title includes the vendor brand somewhere in the middle.
 $SubReplace = [ordered]@{
-    'OptimumPOS' = 'Atlas POS'
-    'Optimum POS' = 'Atlas POS'
+    'DoPos' = 'Atlas POS'
+    'DoPos' = 'Atlas POS'
     'DoPos' = 'Atlas POS'
     'DoBizz' = 'Atlas POS'
 }

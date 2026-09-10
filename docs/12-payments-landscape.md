@@ -22,7 +22,7 @@ before quoting anyone. No reseller or negotiated terms are included here.
 
 | Provider | What they offer | Integration route | Notes |
 |---|---|---|---|
-| **Pin Vandaag / Pin Voordeel B.V.** (NL, Tilburg) | Cloud card acceptance; worldline/CCV/PAX/Ingenico/Verifone terminals; SoftPOS; free LGPL-3 **Odoo module** | REST API v2 (`X-API-KEY`), cloud-terminal | Our chosen Community route. Same group as Optimum POS. Terminals: PAX A77/A920/A35, Ingenico DX8000/RX5000, Verifone V400m/P400/Vx680, Worldline Yomani/Yoximo. Transaction processing roughly €0.06/debit txn; credit ~1.6%; SoftPOS ~€2/mo + per-txn. |
+| **Pin Vandaag / Pin Voordeel B.V.** (NL, Tilburg) | Cloud card acceptance; worldline/CCV/PAX/Ingenico/Verifone terminals; SoftPOS; free LGPL-3 **Odoo module** | REST API v2 (`X-API-KEY`), cloud-terminal | Our chosen Community route. Same group as DoPos. Terminals: PAX A77/A920/A35, Ingenico DX8000/RX5000, Verifone V400m/P400/Vx680, Worldline Yomani/Yoximo. Transaction processing roughly €0.06/debit txn; credit ~1.6%; SoftPOS ~€2/mo + per-txn. |
 | **Worldline** | Acquirer + terminals (Yomani/Yoximo/Valina); CTEP/CTAP | Native Odoo = Enterprise + IoT box; cloud = via Pin Vandaag | Owner of the Yomani/CTEP toolchain. |
 | **CCV** | NL acquirer + terminals (PAX, Verifone); ITS/Cloud Connect | Cloud + ITS; some integrations "in development" | Debit ~€0.06–0.07/txn; credit ~1.6%; terminal rental from ~€25/mo. Some models excluded from third-party takeover. |
 | **Adyen** | Global PSP + terminals + webhooks | Native Odoo `pos_adyen` exists (different acquirer); also API | Enterprise-grade; minimum monthly commitments make it heavy for a single small venue. Good for scaled multi-venue later. |
