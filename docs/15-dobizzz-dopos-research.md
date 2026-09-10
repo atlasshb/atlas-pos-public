@@ -90,7 +90,23 @@ security/governance consideration (who can reach the machine, and when).
 - **Lock-in**: the webshop/app/Track & Trace are the venue's public face, so
   leaving is a customer-facing project, not just a software swap.
 
-## 7. Open questions (confirm per venue, do not assume)
+## 7. Observed database schema
+
+From read-only copies of the incumbent (our collectors), the database uses Dutch
+table/column names. **Confirm per edition** — Portable is a SQLite file;
+Business/Linux use a network DB.
+
+| Table | Role | Columns observed |
+|---|---|---|
+| `artikel` | products | `A_CODE`, `A_PRIJS` (eurocents), `A_BTW_TARIEF` |
+| `bestelling` | orders | `B_ID`, `B_DATUM`, `B_TIJD`, `B_BEDRAG`, `B_BETAALD`, `B_BETAALD_CASH`, `B_BETAALD_APIC`, `B_PINBON` |
+| `bestelling_detail` | order lines | `BD_ID`, `BD_BESTELLING`, `BD_ARTIKEL`, `BD_NAAM`, `BD_AANTAL`, `BD_BEDRAG`, `BD_BTW_TARIEF` |
+| `klanten` | customers | `KLANTID` |
+
+Prices are integer **eurocents**. Still to confirm: the product PK/name/category
+columns, the category table, and active/service flags. See `../migration/MAPPING.md`.
+
+## 8. Open questions (confirm per venue, do not assume)
 
 - Which edition is each venue on? (SQLite portable vs network.)
 - Exact **database schema** for orders, menu, customers, delivery status.

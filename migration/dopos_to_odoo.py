@@ -186,60 +186,59 @@ def assert_twin_is_hub(host: str) -> None:
 
 
 # =============================================================================
-# DoPos schema map  --  THE CRITICAL TODO SURFACE
+# Incumbent (DoPos) schema map
 # -----------------------------------------------------------------------------
-# These names are PLACEHOLDERS. The real DoPos MySQL schema is vendor-
-# defined and was NOT captured in this session. Before trusting this ETL you
-# MUST inspect the actual twin schema per site (Venue A 192.0.2.10, Venue B
-# 192.0.2.10) and pin every table/column below.
+# The incumbent uses Dutch table/column names. The tables and columns below are
+# OBSERVED from read-only copies of the incumbent (see
+# `components/collector/journal_chain.py` and `components/collector/posops_direct.py`);
+# where a field is not confirmed it is marked TODO(confirm). Editions differ
+# (Portable = SQLite file; Business/Linux = network DB), so ALWAYS re-confirm
+# against a read-only twin per site before trusting a migration.
 #
-# Inspect with, against the TWIN (never the live box):
-#   SHOW TABLES;
-#   SHOW CREATE TABLE <table>;
-#   SELECT * FROM <table> LIMIT 5;
+# Observed incumbent tables:
+#   artikel            products    - A_CODE, A_PRIJS (eurocents), A_BTW_TARIEF
+#   bestelling         orders      - B_ID, B_DATUM, B_TIJD, B_BEDRAG,
+#                                    B_BETAALD, B_BETAALD_CASH, B_BETAALD_APIC,
+#                                    B_PINBON
+#   bestelling_detail  order lines - BD_ID, BD_BESTELLING, BD_ARTIKEL, BD_NAAM,
+#                                    BD_AANTAL, BD_BEDRAG, BD_BTW_TARIEF
+#   klanten            customers   - KLANTID
 #
-# Confirm specifically:
-#   - product table + PK + name + price column(s) + category FK + tax FK/rate
-#   - whether price is tax-INCLUSIVE or EXCLUSIVE  (sets prices_tax_inclusive)
-#   - category table + PK + name
-#   - tax table OR an inline rate column on products (rate as 21.0 / 0.21 / id)
-#   - payment-method table + how card vs cash is distinguished
-#   - the table engine per table (InnoDB vs MyISAM) — affects capability B, not
-#     this ETL, but note MyISAM history tables for the twin's consistency.
+# Inspect against the TWIN (never the live box): SHOW TABLES; SHOW CREATE TABLE.
+# Price is stored in eurocents and is assumed tax-INCLUSIVE until confirmed.
 # =============================================================================
 SCHEMA: Dict[str, Dict[str, str]] = {
-    # TODO(schema): confirm against real DoPos dump.
     "product": {
-        "table":      "tblArticle",          # TODO confirm
-        "pk":         "ArticleID",            # TODO confirm
-        "name":       "ArticleName",          # TODO confirm
-        "price":      "SalePrice",            # TODO confirm (incl or excl tax?)
-        "category_fk":"CategoryID",           # TODO confirm
-        "tax_rate":   "VatRate",              # TODO confirm: rate value or FK
-        "active":     "IsActive",             # TODO confirm (may not exist)
-        "is_service": "IsService",            # TODO confirm (else all 'consu')
+        "table":      "artikel",       # observed
+        "pk":         "A_ID",          # TODO(confirm)
+        "name":       "A_NAAM",        # TODO(confirm)
+        "price":      "A_PRIJS",       # observed (eurocents)
+        "category_fk":"A_GROEP",       # TODO(confirm)
+        "tax_rate":   "A_BTW_TARIEF",  # observed
+        "active":     "A_ACTIEF",      # TODO(confirm; may not exist)
+        "is_service": "A_SERVICE",     # TODO(confirm; else default 'consu')
     },
     "category": {
-        "table": "tblCategory",               # TODO confirm
-        "pk":    "CategoryID",                # TODO confirm
-        "name":  "CategoryName",              # TODO confirm
+        "table": "artikel_groep",      # TODO(confirm)
+        "pk":    "AG_ID",              # TODO(confirm)
+        "name":  "AG_NAAM",            # TODO(confirm)
     },
-    "payment_method": {
-        "table":   "tblPaymentType",          # TODO confirm
-        "pk":      "PaymentTypeID",           # TODO confirm
-        "name":    "PaymentTypeName",         # TODO confirm
-        "is_cash": "IsCash",                  # TODO confirm (else infer by name)
+    "payment_method": {                # incumbent stores method flags on the order
+        "table":   "bestelling",       # observed
+        "pk":      "B_ID",             # observed
+        "name":    "B_BETAALD",        # observed
+        "is_cash": "B_BETAALD_CASH",   # observed
     },
-    "sales": {                                 # only read with --with-history
-        "table":      "tblSale",              # TODO confirm
-        "pk":         "SaleID",               # TODO confirm
-        "datetime":   "SaleDateTime",         # TODO confirm
-        "total":      "TotalAmount",          # TODO confirm
-        "line_table": "tblSaleLine",          # TODO confirm
-        "line_fk":    "SaleID",               # TODO confirm
-        "line_article_fk": "ArticleID",       # TODO confirm
-        "line_qty":   "Quantity",             # TODO confirm
-        "line_price": "LinePrice",            # TODO confirm
+    "sales": {                         # only read with --with-history
+        "table":      "bestelling",        # observed
+        "pk":         "B_ID",              # observed
+        "datetime":   "B_DATUM",           # observed (+ B_TIJD)
+        "total":      "B_BEDRAG",          # observed
+        "line_table": "bestelling_detail", # observed
+        "line_fk":    "BD_BESTELLING",     # observed
+        "line_article_fk": "BD_ARTIKEL",   # observed
+        "line_qty":   "BD_AANTAL",         # observed
+        "line_price": "BD_BEDRAG",         # observed
     },
 }
 

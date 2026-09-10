@@ -20,12 +20,20 @@ Odoo 19 Community database. It is the source-of-truth referenced by capability C
    All DoPos card/pin variants collapse to ONE manual bank payment method; `use_payment_terminal`
    is left unset.
 
-> **CRITICAL CAVEAT — the source schema is not yet confirmed.** The exact DoPos MySQL table/column
-> names below are by ROLE, inferred from the documented DoPos entity set (products, categories,
-> prices, taxes/BTW, payment methods, sales/tickets, staff). They are placeholders until verified against
-> a real dump. Section 11 (Confirming the real schema) is mandatory before the ETL is trusted on any site.
-> Schema may also vary by DoPos build/version per client — re-run the confirmation steps per site and
-> record per-client deltas.
+> **Schema status — partially confirmed.** The table/column names below are
+> **observed** from read-only incumbent copies where noted, and by ROLE elsewhere.
+> Section 11 (Confirming the real schema) is mandatory before the ETL is trusted
+> on any site. The schema varies by edition (Portable = SQLite file; Business/Linux
+> = network DB) and possibly by build, so re-run the confirmation per site.
+>
+> **Observed incumbent tables/columns**
+> (from `components/collector/`, read-only):
+> `artikel` — `A_CODE`, `A_PRIJS` (eurocents), `A_BTW_TARIEF`;
+> `bestelling` — `B_ID`, `B_DATUM`, `B_TIJD`, `B_BEDRAG`, `B_BETAALD`,
+> `B_BETAALD_CASH`, `B_BETAALD_APIC`, `B_PINBON`;
+> `bestelling_detail` — `BD_ID`, `BD_BESTELLING`, `BD_ARTIKEL`, `BD_NAAM`,
+> `BD_AANTAL`, `BD_BEDRAG`, `BD_BTW_TARIEF`;
+> `klanten` — `KLANTID`.
 
 ---
 
