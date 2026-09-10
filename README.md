@@ -18,6 +18,10 @@ for everyone than rediscovering it.
 | Path | What it is |
 |---|---|
 | `docs/` | Research and design notes: Odoo POS landscape (Community vs Enterprise), the OCA POS ecosystem, Pin Vandaag/Worldline integration, payments architecture, migration strategy, POS scope & compliance. |
+| `docs/11-oss-pos-projects.md` | A worldwide list of open-source POS projects with upstream URLs and our verdict on each. |
+| `docs/12-payments-landscape.md` | Card terminals, PSPs, SoftPOS and open banking — integration routes and compliance boundaries. |
+| `docs/13-world-pos-payments-trends.md` | Market-level POS/payments trends (indicative figures, public sources). |
+| `docs/infra/` | De-identified engineering notes from running a self-hosted stack: right-sizing, reversible migrations, backups that restore, SSO front door, hardening, silent-failure ops, LLM routing, incident lessons. |
 | `addons/` | Standalone Odoo 19 Community modules: a POS catalogue/config **seed pack**, a backend/login **theme template**, and the ported **Pin Vandaag** payment-terminal module. |
 | `migration/` | An idempotent **OptimumPOS → Odoo 19** ETL and the entity mapping notes. |
 | `program/` | The "discover → read-only mirror → replace" program docs: architecture, roadmap, prep runbook, connection pack and a fleet registry template. |
