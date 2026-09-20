@@ -1,16 +1,14 @@
 # SPDX-License-Identifier: LGPL-3.0-only
-# Copyright (c) PIN Vandaag B.V. — original pos_pinvandaag module (LGPL-3.0)
-# Modified by Atlas Corporation (2026): ported to the Odoo 19 payment_interface API.
-# -*- coding: utf-8 -*-
 from odoo import fields, models
 
 
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
-    module_pos_pinvandaag = fields.Boolean(
-        string="Pin Vandaag Terminal",
-        help="The transactions are processed by payment terminal. "
-             "Set your terminal credentials on the related payment method.",
-        config_parameter="pos_pinvandaag.module_pos_pinvandaag",
+    pinvandaag_base_url = fields.Char(
+        string="Pin Vandaag API base URL",
+        help="REST API v2 base URL. Leave empty for production "
+             "(https://rest-api.pinvandaag.com/V2). Point it at a sandbox / "
+             "simulator to test without a live terminal.",
+        config_parameter="pos_pinvandaag_atlas.base_url",
     )

@@ -1,13 +1,22 @@
-# SPDX-License-Identifier: LGPL-3.0-only
-# Copyright (c) PIN Vandaag B.V. — original pos_pinvandaag module (LGPL-3.0)
-# Modified by Atlas Corporation (2026): ported to the Odoo 19 payment_interface API.
 {
-    "name": "POS Pin Vandaag (Atlas fork, Odoo 19)",
-    "summary": "Pay with CCV/Worldline terminals from the Odoo 19 POS via the Pin Vandaag REST API v2",
+    "name": "POS Pin Vandaag (Atlas)",
+    "summary": "Take CCV / Worldline card payments from Odoo POS via the Pin Vandaag REST API v2",
     "website": "https://www.pinvandaag.nl",
-    "version": "19.0.0.1",
+    "author": "PIN Vandaag B.V. / Atlas Corporation",
+    "version": "19.0.0.2",
     "category": "Sales/Point of Sale",
-    "description": "Atlas fork of the official pos_pinvandaag module (PIN Vandaag B.V., LGPL-3). Ported from the Odoo 17.0 payment API to the Odoo 19 payment_interface API. Drives Worldline/CCV cloud terminals over the Pin Vandaag REST API v2 (start / status / stop / refund / last_transaction). No IoT box and no Enterprise required.",
+    "description": """
+Odoo POS payment terminal integration for Pin Vandaag REST API v2 cloud
+terminals (CCV, Worldline). Fork of the official LGPL-3 pos_pinvandaag module,
+ported to the Odoo 19 payment_interface API.
+
+Atlas changes (19.0.0.2): correct REST v2 response handling
+(transactionId / status / receipt); bounded polling with a clear timeout
+instead of an infinite loop; configurable API base URL
+(pos_pinvandaag_atlas.base_url) so the same module can point at a sandbox or
+simulator without code changes; the API key is read server-side only and is
+never loaded into the POS frontend payload.
+""",
     "sequence": 6,
     "depends": ["base_setup", "point_of_sale"],
     "data": [

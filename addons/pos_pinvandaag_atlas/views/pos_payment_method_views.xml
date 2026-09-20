@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- SPDX-License-Identifier: LGPL-3.0-only | Copyright (c) PIN Vandaag B.V. — original pos_pinvandaag (LGPL-3.0); modified by Atlas Corporation 2026 -->
 <odoo>
-    <record id="pos_payment_method_view_form_inherit_pos_pinvandaag" model="ir.ui.view">
-        <field name="name">pos.payment.method.form.inherit.pos.pinvandaag</field>
+    <record id="pos_payment_method_view_form_inherit_pos_pinvandaag_atlas" model="ir.ui.view">
+        <field name="name">pos.payment.method.form.inherit.pos.pinvandaag.atlas</field>
         <field name="model">pos.payment.method</field>
         <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form"/>
         <field name="arch" type="xml">
