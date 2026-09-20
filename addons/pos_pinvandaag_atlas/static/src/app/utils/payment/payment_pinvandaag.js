@@ -17,6 +17,13 @@ export class PaymentPinvandaag extends PaymentInterface {
         super.setup(...arguments);
         this.transaction_id = null;
         this.continue_on_success = false;
+        // Odoo 19 PaymentInterface.setup() defaults supports_reversals to false,
+        // and the POS uses that flag to decide whether to offer the reversal UI
+        // at all. Implementing sendPaymentReversal without raising this leaves
+        // the method permanently unreachable -- which is what F1 originally
+        // shipped. Verified against point_of_sale/static/src/app/utils/payment/
+        // payment_interface.js in the running 19.0 image.
+        this.supports_reversals = true;
         // F2: set by _cancelRequest so the poll loop can stop itself. Without
         // it the poller kept running after a cashier cancel and reported the
         // terminal's resulting `failed` as "Transaction failed", which reads
