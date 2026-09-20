@@ -9,8 +9,8 @@ REST API.
 
 ## Install
 
-The module lives in `/opt/atlas-odoo/addons`, which **nine containers share** — including live
-client tenants. Being present there does not install it; install per database:
+Drop the module on your addons path. If that path is shared between several databases, note
+that being present does not install it — install per database:
 
     docker exec <container> odoo -c /etc/odoo/odoo.conf -d <db> \
         -i pos_pinvandaag_atlas --stop-after-init --no-http
@@ -31,8 +31,8 @@ Odoo refuses to edit a payment method while a POS session is open. Close the ses
 ## Sandbox
 
 Set the config parameter `pos_pinvandaag_atlas.base_url` to a mock server and no real terminal,
-key or card is needed. Atlas runs one at `/opt/atlas/pinvandaag-sandbox/sandbox.py`
-(172.26.0.1:7810). Clear the parameter to return to `https://rest-api.pinvandaag.com/V2`.
+key or card is needed. One ships in this repo at `components/pinvandaag-sandbox/`. Clear the
+parameter to return to `https://rest-api.pinvandaag.com/V2`.
 
 Scenario by cent amount: `...00` approves, `...13` declines, `...99` never settles.
 
@@ -53,8 +53,6 @@ Exercised end to end against the sandbox: sale, decline, cancel, refund, last tr
 signatures, the `_load_pos_data_fields` hook, and the inherited view xmlids
 (`point_of_sale.pos_payment_method_view_form`, block `pos_payment_terminals_section`).
 A wrong xmlid makes the module fail to install. Confirm these before installing at a venue.
-
-See `/opt/atlas/docs/atlaspos-terminal-handoff.md` (internal) for the full picture.
 
 ## Verified against the Odoo 19 source
 
