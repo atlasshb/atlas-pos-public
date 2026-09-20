@@ -1,0 +1,43 @@
+// Venue-neutral takeaway skin. Every colour comes from a CSS custom property
+// set by views/brand.xml, so a venue is re-branded through configuration.
+
+.atlas-pickup {
+    border: 1px solid rgba(0, 0, 0, .1);
+    border-radius: .75rem;
+    padding: 1rem;
+    background: #fff;
+}
+.atlas-pickup-label {
+    font-weight: 600;
+    color: var(--atlas-ink, #1c1c1c);
+}
+.atlas-pickup-select { max-width: 22rem; }
+.atlas-pickup-help {
+    display: block;
+    margin-top: .35rem;
+    color: rgba(0, 0, 0, .55);
+}
+.atlas-confirm-pickup {
+    border-left: 4px solid var(--atlas-primary, #b4232a);
+}
+
+// Ordering call to action.
+// Targeted from CSS rather than a view inherit: the Odoo 19 product template
+// does not carry an #add_to_cart anchor, and guessing at an xpath is how a
+// theme becomes uninstallable.
+#add_to_cart,
+a#add_to_cart,
+.js_add_cart_variants ~ * button[name="add_to_cart"],
+button.a-submit[id="add_to_cart"] {
+    background: var(--atlas-primary, #b4232a);
+    border-color: var(--atlas-primary, #b4232a);
+    font-weight: 600;
+    border-radius: .6rem;
+    padding-inline: 1.4rem;
+}
+.atlas-cta:hover { filter: brightness(.92); }
+
+// Dish cards: a little more appetite, no branding.
+.oe_product_cart {
+    h6, .o_wsale_product_title { color: var(--atlas-ink, #1c1c1c); font-weight: 600; }
+}

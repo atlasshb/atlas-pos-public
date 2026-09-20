@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Brand colours are emitted as CSS custom properties from config
+         parameters, so re-branding a venue never means editing SCSS. -->
+    <template id="brand_vars" inherit_id="web.layout" priority="99" name="Atlas: brand vars">
+        <xpath expr="//head" position="inside">
+            <t t-set="_p" t-value="request.env['ir.config_parameter'].sudo()"/>
+            <style>
+                :root {
+                    --atlas-primary: <t t-out="_p.get_param('atlas_restaurant.brand_primary', '#b4232a')"/>;
+                    --atlas-ink: <t t-out="_p.get_param('atlas_restaurant.brand_ink', '#1c1c1c')"/>;
+                }
+            </style>
+        </xpath>
+    </template>
+</odoo>

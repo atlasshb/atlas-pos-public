@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Pickup-time selector on the cart. Slots are built in the browser from
+         /atlas/pickup-config, so opening hours are configuration, not code. -->
+    <template id="cart_pickup" inherit_id="website_sale.cart" priority="99"
+              name="Atlas: pickup time">
+        <xpath expr="//t[@t-call='website_sale.cart_lines']" position="before">
+            <div id="atlas_pickup" class="atlas-pickup mb-3"
+                 data-url="/atlas/pickup-time" data-config-url="/atlas/pickup-config">
+                <label for="atlas_pickup_select" class="form-label atlas-pickup-label">
+                    <i class="fa fa-clock-o me-1" aria-hidden="true"/>Gewenste afhaaltijd
+                </label>
+                <select id="atlas_pickup_select" name="atlas_pickup_time"
+                        class="form-select atlas-pickup-select"
+                        t-att-data-selected="website_sale_order.atlas_pickup_time or ''">
+                    <option value="">Zo snel mogelijk</option>
+                </select>
+                <small class="atlas-pickup-help">
+                    We bereiden je bestelling vers. Kies eventueel een later tijdstip.
+                </small>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="confirmation_pickup" inherit_id="website_sale.confirmation" priority="99"
+              name="Atlas: confirmation pickup">
+        <xpath expr="//div[@id='order_name']" position="after">
+            <div t-if="order.atlas_pickup_time" class="alert alert-info atlas-confirm-pickup"
+                 role="status">
+                <i class="fa fa-clock-o me-1" aria-hidden="true"/>
+                Afhaaltijd: <strong t-out="order.atlas_pickup_time"/>
+            </div>
+        </xpath>
+    </template>
+</odoo>
