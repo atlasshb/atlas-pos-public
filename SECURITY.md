@@ -5,7 +5,7 @@
 Please report security issues privately rather than opening a public issue:
 
 - Email: **security@atlascorporation.nl** (or use GitHub's private vulnerability
-  reporting if enabled on the repository).
+  reporting: the **Security** tab -> **Report a vulnerability**).
 
 Include: what you found, where (file/commit), and how it could be abused. We
 aim to acknowledge within a few days.
@@ -37,4 +37,13 @@ If any credential or piece of client/personal data has slipped in:
 
 ## Supported versions
 
-This is a research/early-stage project; fixes land on the `main` branch.
+| Version | Supported |
+|---------|-----------|
+| `main` and the latest tag (`v0.1.0`) | Yes - security fixes land here first |
+| Older tags | No |
+
+Fixes land on `main` and are cut as a new tagged release. Security advisories
+are published through GitHub Security Advisories on this repository.
+
+Response targets: acknowledgement within 3 business days, a triage decision
+within 7 days.

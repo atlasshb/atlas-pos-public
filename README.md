@@ -141,6 +141,14 @@ LGPL-3.
 Documentation and tooling: **MIT** (see [`LICENSE`](LICENSE)).
 Odoo modules under `addons/`: **LGPL-3**.
 
+## Maintainers and production use
+
+Maintained by Atlas Corporation. **Security maintainer:** the Atlas Corporation
+founder ([@atlasshb](https://github.com/atlasshb)), who triages and fixes
+security reports. These components are deployed in production at small Dutch
+hospitality and retail venues; client names and details are never published
+here. Report vulnerabilities privately - see [`SECURITY.md`](SECURITY.md).
+
 ## Contact
 
 Atlas Corporation — Tilburg, NL — <https://atlascorporation.nl>
